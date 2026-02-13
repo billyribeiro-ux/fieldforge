@@ -169,9 +169,18 @@ cd apps/web && pnpm build
 - [x] **Phase 15** — SSR load functions (jobs, customers, estimates, invoices, dashboard)
 - [x] **Phase 16** — /auth/me endpoint, verify_token, server API client
 - [x] **Phase 17** — Final types (AuditLog, Webhook, SearchResults), rate limiting wired, README update
-- [ ] **Phase 18** — Mobile apps (iOS + Android)
-- [ ] **Phase 19** — AI/ML features (photo estimation, smart scheduling)
-- [ ] **Phase 20** — Production deployment, performance tuning, security audit
+- [x] **Phase 18** — DataTable, FileUpload, ConfirmDialog components (24 UI components)
+- [x] **Phase 19** — Debounce/throttle, localStorage utility, database seed script
+- [x] **Phase 20** — SEO meta tags, Dockerfiles (already existed)
+- [x] **Phase 21** — SSR load functions for schedule, inventory, fleet, reports + theme constants
+- [x] **Phase 22** — SSR load for estimate/invoice detail, settings, marketing @const fix
+- [x] **Phase 23** — Dashboard nested error page, estimate builder SSR load
+- [x] **Phase 24** — Payments route wired (24 API modules), fixes
+- [x] **Phase 25** — NotificationStore, LoadingStore (Svelte 5 reactive classes), polling
+- [x] **Phase 26** — Web .env.example, README final update
+- [ ] **Phase 27** — Mobile apps (iOS + Android)
+- [ ] **Phase 28** — AI/ML features (photo estimation, smart scheduling)
+- [ ] **Phase 29** — Production deployment, performance tuning, security audit
 
 ## License
 
