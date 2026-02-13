@@ -209,9 +209,14 @@ cd apps/web && pnpm build
 - [x] **Phase 33** — (merged into Phase 32)
 - [x] **Phase 34** — TypeScript types for form actions and page data (~849 lines)
 - [x] **Phase 35** — Keyboard shortcut utility, README status update
-- [ ] **Phase 36** — Mobile apps (iOS + Android)
-- [ ] **Phase 37** — AI/ML features (photo estimation, smart scheduling)
-- [ ] **Phase 38** — Production deployment, performance tuning, security audit
+- [x] **Phase 36** — `<svelte:head>` titles for all detail pages (14 total)
+- [x] **Phase 37** — Keyboard shortcuts wired into layout, navigation loading bar
+- [x] **Phase 38** — documents, recurring_rules, tags routes wired (30 → 35 API modules)
+- [x] **Phase 39** — README updated with 35 API route modules
+- [x] **Phase 40** — Skip-to-content accessibility link, final polish
+- [ ] **Phase 41** — Mobile apps (iOS + Android)
+- [ ] **Phase 42** — AI/ML features (photo estimation, smart scheduling)
+- [ ] **Phase 43** — Production deployment, performance tuning, security audit
 
 ## License
 
