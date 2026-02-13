@@ -22,7 +22,9 @@
 		CreditCard,
 		UsersRound,
 		Megaphone,
-		Radio
+		Radio,
+		ShieldCheck,
+		Zap
 	} from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 
@@ -43,6 +45,8 @@
 		{ href: '/dashboard/expenses', label: 'Expenses', icon: Wallet },
 		{ href: '/dashboard/team', label: 'Team', icon: UsersRound },
 		{ href: '/dashboard/marketing', label: 'Marketing', icon: Megaphone },
+		{ href: '/dashboard/compliance', label: 'Compliance', icon: ShieldCheck },
+		{ href: '/dashboard/automation', label: 'Automation', icon: Zap },
 		{ href: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
 		{ href: '/dashboard/settings', label: 'Settings', icon: Settings }
 	];
@@ -61,6 +65,8 @@
 <button
 	onclick={() => (mobileOpen = !mobileOpen)}
 	class="fixed top-4 left-4 z-50 lg:hidden p-2 bg-surface-900 text-white rounded-lg shadow-lg cursor-pointer"
+	aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+	aria-expanded={mobileOpen}
 >
 	{#if mobileOpen}
 		<X class="w-5 h-5" />
@@ -76,6 +82,8 @@
 {/if}
 
 <aside
+	role="navigation"
+	aria-label="Main navigation"
 	class={cn(
 		'fixed left-0 top-0 h-screen bg-surface-900 text-white flex flex-col z-40 transition-all duration-[var(--transition-slow)]',
 		// Desktop
@@ -98,7 +106,7 @@
 	</div>
 
 	<!-- Navigation -->
-	<nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+	<nav class="flex-1 py-4 px-3 space-y-1 overflow-y-auto" aria-label="Dashboard navigation">
 		{#each navItems as item}
 			{@const active = isActive(item.href)}
 			<a
@@ -111,6 +119,7 @@
 						: 'text-surface-300 hover:bg-surface-800 hover:text-white'
 				)}
 				title={collapsed && !mobileOpen ? item.label : undefined}
+				aria-current={active ? 'page' : undefined}
 			>
 				<item.icon class="w-5 h-5 flex-shrink-0" />
 				{#if !collapsed || mobileOpen}
@@ -136,6 +145,7 @@
 
 		<button
 			onclick={() => auth.logout()}
+			aria-label="Sign out"
 			class={cn(
 				'flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-surface-400 hover:bg-surface-800 hover:text-white transition-all duration-[var(--transition-fast)] cursor-pointer',
 				collapsed && !mobileOpen && 'justify-center'
@@ -151,6 +161,7 @@
 	<!-- Collapse toggle (desktop only) -->
 	<button
 		onclick={() => (collapsed = !collapsed)}
+		aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
 		class="absolute -right-3 top-20 w-6 h-6 bg-surface-700 border border-surface-600 rounded-full hidden lg:flex items-center justify-center text-surface-300 hover:text-white hover:bg-surface-600 transition-colors cursor-pointer z-50"
 	>
 		{#if collapsed}
