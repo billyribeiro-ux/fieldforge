@@ -37,6 +37,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Inventory — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Inventory">
 	{#snippet actions()}
 		<Button variant="primary" size="md">

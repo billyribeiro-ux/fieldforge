@@ -47,6 +47,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>Invoices — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Invoices">
 	{#snippet actions()}
 		<a href="/dashboard/invoices/new">

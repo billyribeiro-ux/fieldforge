@@ -115,6 +115,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Dashboard — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Dashboard">
 	{#snippet actions()}
 		<Button variant="primary" size="md">

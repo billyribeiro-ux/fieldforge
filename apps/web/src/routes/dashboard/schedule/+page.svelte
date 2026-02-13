@@ -48,6 +48,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Schedule — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Schedule">
 	{#snippet actions()}
 		<Button variant="primary" size="md">

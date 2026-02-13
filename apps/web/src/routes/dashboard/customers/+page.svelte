@@ -48,6 +48,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Customers — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Customers">
 	{#snippet actions()}
 		<Button variant="primary" size="md" onclick={() => (showCreateCustomer = true)}>

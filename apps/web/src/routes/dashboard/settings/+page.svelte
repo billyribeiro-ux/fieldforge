@@ -81,6 +81,10 @@
 	let taxRate = $state('8.25');
 </script>
 
+<svelte:head>
+	<title>Settings — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Settings" />
 
 <div class="p-6">

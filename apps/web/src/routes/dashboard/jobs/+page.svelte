@@ -87,6 +87,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>Jobs — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Jobs">
 	{#snippet actions()}
 		<Button variant="primary" size="md" onclick={() => (showCreateJob = true)}>

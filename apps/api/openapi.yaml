@@ -1,0 +1,950 @@
+openapi: "3.1.0"
+info:
+  title: FieldForge API
+  version: "0.1.0"
+  description: Universal job management platform for tradespeople — HVAC, plumbing, electrical, and general contracting.
+  contact:
+    name: FieldForge Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+  - url: https://api.fieldforge.io/api/v1
+    description: Production
+
+tags:
+  - name: Health
+  - name: Auth
+  - name: Customers
+  - name: Jobs
+  - name: Estimates
+  - name: Invoices
+  - name: Payments
+  - name: Time Entries
+  - name: Photos
+  - name: Properties
+  - name: Notes
+  - name: Teams
+  - name: Inventory
+  - name: Vehicles
+  - name: Checklists
+  - name: Equipment
+  - name: Expenses
+  - name: Messages
+  - name: Reviews
+  - name: Service Plans
+  - name: Search
+  - name: Audit
+  - name: Webhooks
+  - name: Notifications
+  - name: Automation Rules
+  - name: Licenses
+  - name: Insurance Policies
+  - name: WebSocket
+
+paths:
+  # ── Health ──
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+
+  # ── Auth ──
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user and team
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/AuthResponse" }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/AuthResponse" }
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user profile
+      operationId: getMe
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiResponse" }
+
+  # ── Customers ──
+  /customers:
+    get:
+      tags: [Customers]
+      summary: List customers
+      operationId: listCustomers
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/cursor" }
+        - { $ref: "#/components/parameters/limit" }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+    post:
+      tags: [Customers]
+      summary: Create a customer
+      operationId: createCustomer
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateCustomerRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /customers/{id}:
+    get:
+      tags: [Customers]
+      summary: Get customer by ID
+      operationId: getCustomer
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    patch:
+      tags: [Customers]
+      summary: Update a customer
+      operationId: updateCustomer
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Jobs ──
+  /jobs:
+    get:
+      tags: [Jobs]
+      summary: List jobs
+      operationId: listJobs
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/cursor" }
+        - { $ref: "#/components/parameters/limit" }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+    post:
+      tags: [Jobs]
+      summary: Create a job
+      operationId: createJob
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /jobs/{id}:
+    get:
+      tags: [Jobs]
+      summary: Get job by ID
+      operationId: getJob
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /jobs/{id}/status:
+    post:
+      tags: [Jobs]
+      summary: Transition job status
+      operationId: transitionJobStatus
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Estimates ──
+  /estimates:
+    get:
+      tags: [Estimates]
+      summary: List estimates
+      operationId: listEstimates
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+    post:
+      tags: [Estimates]
+      summary: Create an estimate
+      operationId: createEstimate
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /estimates/{id}:
+    get:
+      tags: [Estimates]
+      summary: Get estimate by ID
+      operationId: getEstimate
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /estimates/{id}/send:
+    post:
+      tags: [Estimates]
+      summary: Send estimate to customer
+      operationId: sendEstimate
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /estimates/{id}/approve:
+    post:
+      tags: [Estimates]
+      summary: Approve estimate (customer portal)
+      operationId: approveEstimate
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Invoices ──
+  /invoices:
+    get:
+      tags: [Invoices]
+      summary: List invoices
+      operationId: listInvoices
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+    post:
+      tags: [Invoices]
+      summary: Create an invoice
+      operationId: createInvoice
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /invoices/{id}:
+    get:
+      tags: [Invoices]
+      summary: Get invoice by ID
+      operationId: getInvoice
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /invoices/{id}/send:
+    post:
+      tags: [Invoices]
+      summary: Send invoice to customer
+      operationId: sendInvoice
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /invoices/{id}/void:
+    post:
+      tags: [Invoices]
+      summary: Void an invoice
+      operationId: voidInvoice
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /invoices/{id}/payments:
+    get:
+      tags: [Invoices]
+      summary: List payments for an invoice
+      operationId: listInvoicePayments
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Invoices]
+      summary: Record a payment against an invoice
+      operationId: recordPayment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Payments ──
+  /payments:
+    get:
+      tags: [Payments]
+      summary: List all payments
+      operationId: listPayments
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/cursor" }
+        - { $ref: "#/components/parameters/limit" }
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+
+  /payments/{id}:
+    get:
+      tags: [Payments]
+      summary: Get payment by ID
+      operationId: getPayment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /payments/{id}/refund:
+    post:
+      tags: [Payments]
+      summary: Refund a payment
+      operationId: refundPayment
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: number, description: "Partial refund amount (omit for full refund)" }
+                reason: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Time Entries ──
+  /jobs/{job_id}/time-entries:
+    get:
+      tags: [Time Entries]
+      summary: List time entries for a job
+      operationId: listTimeEntries
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /time-entries/start:
+    post:
+      tags: [Time Entries]
+      summary: Start a timer
+      operationId: startTimer
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /time-entries/{id}/stop:
+    post:
+      tags: [Time Entries]
+      summary: Stop a timer
+      operationId: stopTimer
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Photos ──
+  /jobs/{job_id}/photos:
+    get:
+      tags: [Photos]
+      summary: List photos for a job
+      operationId: listPhotos
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Photos]
+      summary: Upload a photo
+      operationId: uploadPhoto
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Properties ──
+  /customers/{customer_id}/properties:
+    get:
+      tags: [Properties]
+      summary: List properties for a customer
+      operationId: listProperties
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Properties]
+      summary: Create a property
+      operationId: createProperty
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Notes ──
+  /jobs/{job_id}/notes:
+    get:
+      tags: [Notes]
+      summary: List notes for a job
+      operationId: listNotes
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Notes]
+      summary: Create a note
+      operationId: createNote
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Teams ──
+  /teams/members:
+    get:
+      tags: [Teams]
+      summary: List team members
+      operationId: listTeamMembers
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /teams/invite:
+    post:
+      tags: [Teams]
+      summary: Invite a team member
+      operationId: inviteTeamMember
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Inventory ──
+  /inventory:
+    get:
+      tags: [Inventory]
+      summary: List inventory items
+      operationId: listInventory
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+    post:
+      tags: [Inventory]
+      summary: Create an inventory item
+      operationId: createInventoryItem
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Vehicles ──
+  /vehicles:
+    get:
+      tags: [Vehicles]
+      summary: List vehicles
+      operationId: listVehicles
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Vehicles]
+      summary: Create a vehicle
+      operationId: createVehicle
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Checklists ──
+  /jobs/{job_id}/checklists:
+    get:
+      tags: [Checklists]
+      summary: List checklists for a job
+      operationId: listChecklists
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Checklists]
+      summary: Create a checklist
+      operationId: createChecklist
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Equipment ──
+  /equipment:
+    get:
+      tags: [Equipment]
+      summary: List equipment
+      operationId: listEquipment
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Equipment]
+      summary: Create equipment
+      operationId: createEquipment
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Expenses ──
+  /expenses:
+    get:
+      tags: [Expenses]
+      summary: List expenses
+      operationId: listExpenses
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+    post:
+      tags: [Expenses]
+      summary: Create an expense
+      operationId: createExpense
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Messages ──
+  /messages:
+    post:
+      tags: [Messages]
+      summary: Send a message
+      operationId: sendMessage
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /customers/{customer_id}/messages:
+    get:
+      tags: [Messages]
+      summary: List messages for a customer
+      operationId: listCustomerMessages
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Reviews ──
+  /reviews:
+    get:
+      tags: [Reviews]
+      summary: List reviews
+      operationId: listReviews
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Reviews]
+      summary: Create a review
+      operationId: createReview
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /reviews/{id}/respond:
+    post:
+      tags: [Reviews]
+      summary: Respond to a review
+      operationId: respondToReview
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Service Plans ──
+  /service-plans:
+    get:
+      tags: [Service Plans]
+      summary: List service plans
+      operationId: listServicePlans
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Service Plans]
+      summary: Create a service plan
+      operationId: createServicePlan
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Search ──
+  /search:
+    get:
+      tags: [Search]
+      summary: Global search across jobs, customers, estimates, invoices
+      operationId: globalSearch
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Audit ──
+  /audit:
+    get:
+      tags: [Audit]
+      summary: List audit log entries
+      operationId: listAuditLogs
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/PaginatedResponse" }
+
+  # ── Webhooks ──
+  /webhooks:
+    get:
+      tags: [Webhooks]
+      summary: List webhook endpoints
+      operationId: listWebhooks
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Webhooks]
+      summary: Create a webhook endpoint
+      operationId: createWebhook
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Notifications ──
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications
+      operationId: listNotifications
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /notifications/{id}/read:
+    post:
+      tags: [Notifications]
+      summary: Mark notification as read
+      operationId: markNotificationRead
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /notifications/read-all:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      operationId: markAllNotificationsRead
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Automation Rules ──
+  /automation-rules:
+    get:
+      tags: [Automation Rules]
+      summary: List automation rules
+      operationId: listAutomationRules
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Automation Rules]
+      summary: Create an automation rule
+      operationId: createAutomationRule
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /automation-rules/{id}:
+    get:
+      tags: [Automation Rules]
+      summary: Get automation rule by ID
+      operationId: getAutomationRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    patch:
+      tags: [Automation Rules]
+      summary: Update an automation rule
+      operationId: updateAutomationRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Automation Rules]
+      summary: Delete an automation rule
+      operationId: deleteAutomationRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /automation-rules/{id}/toggle:
+    post:
+      tags: [Automation Rules]
+      summary: Toggle automation rule active/inactive
+      operationId: toggleAutomationRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Licenses ──
+  /licenses:
+    get:
+      tags: [Licenses]
+      summary: List licenses and certifications
+      operationId: listLicenses
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Licenses]
+      summary: Create a license record
+      operationId: createLicense
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /licenses/{id}:
+    get:
+      tags: [Licenses]
+      summary: Get license by ID
+      operationId: getLicense
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Licenses]
+      summary: Delete a license record
+      operationId: deleteLicense
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Insurance Policies ──
+  /insurance-policies:
+    get:
+      tags: [Insurance Policies]
+      summary: List insurance policies
+      operationId: listInsurancePolicies
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Insurance Policies]
+      summary: Create an insurance policy
+      operationId: createInsurancePolicy
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /insurance-policies/{id}:
+    get:
+      tags: [Insurance Policies]
+      summary: Get insurance policy by ID
+      operationId: getInsurancePolicy
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Insurance Policies]
+      summary: Delete an insurance policy
+      operationId: deleteInsurancePolicy
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── WebSocket ──
+  /ws:
+    get:
+      tags: [WebSocket]
+      summary: WebSocket connection for real-time events
+      operationId: websocket
+      description: |
+        Upgrade to WebSocket for real-time events.
+        Events: job_status_changed, payment_received, new_message, schedule_changed, inventory_alert, technician_location.
+        Client messages: { type: "ping" }, { type: "subscribe", channel: "..." }
+      responses:
+        "101":
+          description: Switching Protocols (WebSocket upgrade)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    limit:
+      name: limit
+      in: query
+      schema: { type: integer, default: 25, maximum: 100 }
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, first_name, last_name, company_name]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        first_name: { type: string }
+        last_name: { type: string }
+        company_name: { type: string }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    CreateCustomerRequest:
+      type: object
+      required: [first_name, last_name]
+      properties:
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        company_name: { type: string }
+
+    ApiResponse:
+      type: object
+      properties:
+        data: {}
+        meta: { type: object, nullable: true }
+        errors:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              message: { type: string }
+
+    ApiError:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              message: { type: string }
+        data: { nullable: true }
+        meta: { nullable: true }
+
+  responses:
+    DataResponse:
+      description: Successful response with data
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiResponse" }
+
+    PaginatedResponse:
+      description: Paginated response
+      content:
+        application/json:
+          schema:
+            allOf:
+              - { $ref: "#/components/schemas/ApiResponse" }
+              - type: object
+                properties:
+                  meta:
+                    type: object
+                    properties:
+                      has_more: { type: boolean }
+                      cursor: { type: string, nullable: true }
+
+    AuthResponse:
+      description: Authentication response with JWT token
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  token: { type: string }
+                  user: { type: object }
+              meta: { nullable: true }
+              errors: { nullable: true }
+
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }

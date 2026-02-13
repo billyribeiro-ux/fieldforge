@@ -47,6 +47,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>Estimates — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Estimates">
 	{#snippet actions()}
 		<Button variant="primary" size="md">

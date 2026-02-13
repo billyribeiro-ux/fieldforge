@@ -57,6 +57,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Reports — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Reports">
 	{#snippet actions()}
 		<div class="flex items-center gap-2">
