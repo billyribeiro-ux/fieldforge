@@ -2,11 +2,14 @@ pub mod auth;
 pub mod customers;
 pub mod estimates;
 pub mod health;
+pub mod inventory;
 pub mod invoices;
 pub mod jobs;
 pub mod notes;
 pub mod photos;
 pub mod properties;
+pub mod inventory;
+pub mod vehicles;
 pub mod teams;
 pub mod time_entries;
 
@@ -26,5 +29,8 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(photos::router())
         .merge(properties::router())
         .merge(notes::router())
+        .merge(inventory::router())
+        .merge(vehicles::router())
         .merge(teams::router())
+        .merge(inventory::router())
 }
