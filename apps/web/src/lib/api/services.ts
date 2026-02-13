@@ -10,6 +10,8 @@ import type {
 	AutomationRule, CreateAutomationRuleRequest,
 	License, CreateLicenseRequest,
 	InsurancePolicy, CreateInsurancePolicyRequest,
+	RecurringRule, CreateRecurringRuleRequest,
+	Tag, FuelLog, PurchaseOrder, GpsLocation,
 	PaginatedResponse, ApiResponse
 } from '$lib/types';
 
@@ -374,6 +376,93 @@ export const insurancePolicies = {
 		api.post<InsurancePolicy>('/insurance-policies', data),
 	delete: (id: string) =>
 		api.delete<null>(`/insurance-policies/${id}`),
+};
+
+// ── Tags ──
+
+export const tags = {
+	list: () =>
+		api.get<Tag[]>('/tags'),
+	create: (data: { name: string; color?: string }) =>
+		api.post<Tag>('/tags', data),
+	delete: (id: string) =>
+		api.delete<null>(`/tags/${id}`),
+};
+
+// ── Recurring Rules ──
+
+export const recurringRules = {
+	list: () =>
+		api.get<RecurringRule[]>('/recurring-rules'),
+	get: (id: string) =>
+		api.get<RecurringRule>(`/recurring-rules/${id}`),
+	create: (data: CreateRecurringRuleRequest) =>
+		api.post<RecurringRule>('/recurring-rules', data),
+	delete: (id: string) =>
+		api.delete<null>(`/recurring-rules/${id}`),
+	toggle: (id: string) =>
+		api.post<RecurringRule>(`/recurring-rules/${id}/toggle`, {}),
+	generate: (id: string) =>
+		api.post<unknown>(`/recurring-rules/${id}/generate`, {}),
+};
+
+// ── Documents ──
+
+export const documents = {
+	list: (params?: Record<string, string>) =>
+		api.get<unknown[]>('/documents', params),
+	create: (data: Record<string, unknown>) =>
+		api.post<unknown>('/documents', data),
+	delete: (id: string) =>
+		api.delete<null>(`/documents/${id}`),
+};
+
+// ── Signatures ──
+
+export const signatures = {
+	list: (params?: Record<string, string>) =>
+		api.get<unknown[]>('/signatures', params),
+	create: (data: Record<string, unknown>) =>
+		api.post<unknown>('/signatures', data),
+};
+
+// ── Fuel Logs ──
+
+export const fuelLogs = {
+	list: (vehicleId: string) =>
+		api.get<FuelLog[]>(`/vehicles/${vehicleId}/fuel-logs`),
+	create: (vehicleId: string, data: Record<string, unknown>) =>
+		api.post<FuelLog>(`/vehicles/${vehicleId}/fuel-logs`, data),
+	delete: (id: string) =>
+		api.delete<null>(`/fuel-logs/${id}`),
+};
+
+// ── Purchase Orders ──
+
+export const purchaseOrders = {
+	list: () =>
+		api.get<PurchaseOrder[]>('/purchase-orders'),
+	get: (id: string) =>
+		api.get<PurchaseOrder>(`/purchase-orders/${id}`),
+	create: (data: Record<string, unknown>) =>
+		api.post<PurchaseOrder>('/purchase-orders', data),
+	update: (id: string, data: Record<string, unknown>) =>
+		api.patch<PurchaseOrder>(`/purchase-orders/${id}`, data),
+	delete: (id: string) =>
+		api.delete<null>(`/purchase-orders/${id}`),
+	receive: (id: string) =>
+		api.post<PurchaseOrder>(`/purchase-orders/${id}/receive`, {}),
+};
+
+// ── GPS Tracking ──
+
+export const gps = {
+	updateLocation: (data: { latitude: number; longitude: number; accuracy?: number; speed?: number; heading?: number }) =>
+		api.post<GpsLocation>('/gps/location', data),
+	listTechnicians: () =>
+		api.get<GpsLocation[]>('/gps/technicians'),
+	history: (userId: string) =>
+		api.get<GpsLocation[]>(`/gps/technicians/${userId}/history`),
 };
 
 export const notifications = {
