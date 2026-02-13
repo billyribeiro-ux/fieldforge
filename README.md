@@ -36,7 +36,7 @@ fieldforge/
 | **Infrastructure** | AWS ECS Fargate, RDS, ElastiCache, S3, CloudFront |
 | **CI/CD** | GitHub Actions (Rust, Node, Python) |
 
-## API Routes (23 modules)
+## API Routes (24 modules)
 
 | Module | Endpoints |
 |--------|-----------|
@@ -63,6 +63,7 @@ fieldforge/
 | `audit` | Paginated audit log with entity/user/action filters |
 | `webhooks` | CRUD, HMAC secret generation, test endpoint |
 | `notifications` | List, mark read, mark all read, unread count |
+| `payments` | List payments, get payment, refund with reason |
 
 ## Web Dashboard Pages
 

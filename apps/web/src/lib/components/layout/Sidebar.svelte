@@ -21,7 +21,8 @@
 		Wallet,
 		CreditCard,
 		UsersRound,
-		Megaphone
+		Megaphone,
+		Radio
 	} from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 
@@ -33,6 +34,7 @@
 		{ href: '/dashboard/jobs', label: 'Jobs', icon: Briefcase },
 		{ href: '/dashboard/customers', label: 'Customers', icon: Users },
 		{ href: '/dashboard/schedule', label: 'Schedule', icon: Calendar },
+		{ href: '/dashboard/dispatch', label: 'Dispatch', icon: Radio },
 		{ href: '/dashboard/estimates', label: 'Estimates', icon: FileText },
 		{ href: '/dashboard/invoices', label: 'Invoices', icon: Receipt },
 		{ href: '/dashboard/payments', label: 'Payments', icon: CreditCard },

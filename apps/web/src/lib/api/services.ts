@@ -317,6 +317,17 @@ export const reviews = {
 		api.post<Review>(`/reviews/${id}/respond`, { response }),
 };
 
+// ── Payments ──
+
+export const payments = {
+	list: (params?: Record<string, string>) =>
+		api.get<Payment[]>('/payments', params),
+	get: (id: string) =>
+		api.get<Payment>(`/payments/${id}`),
+	refund: (id: string, data: { amount?: number; reason?: string }) =>
+		api.post<Payment>(`/payments/${id}/refund`, data),
+};
+
 // ── Notifications ──
 
 export const notifications = {
