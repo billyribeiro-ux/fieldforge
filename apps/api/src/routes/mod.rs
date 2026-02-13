@@ -4,6 +4,8 @@ pub mod estimates;
 pub mod health;
 pub mod invoices;
 pub mod jobs;
+pub mod photos;
+pub mod teams;
 pub mod time_entries;
 
 use std::sync::Arc;
@@ -19,4 +21,6 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(estimates::router())
         .merge(invoices::router())
         .merge(time_entries::router())
+        .merge(photos::router())
+        .merge(teams::router())
 }
