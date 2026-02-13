@@ -18,7 +18,10 @@
 		LogOut,
 		Menu,
 		X,
-		Wallet
+		Wallet,
+		CreditCard,
+		UsersRound,
+		Megaphone
 	} from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.svelte';
 
@@ -32,9 +35,12 @@
 		{ href: '/dashboard/schedule', label: 'Schedule', icon: Calendar },
 		{ href: '/dashboard/estimates', label: 'Estimates', icon: FileText },
 		{ href: '/dashboard/invoices', label: 'Invoices', icon: Receipt },
+		{ href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
 		{ href: '/dashboard/inventory', label: 'Inventory', icon: Package },
 		{ href: '/dashboard/fleet', label: 'Fleet', icon: Truck },
 		{ href: '/dashboard/expenses', label: 'Expenses', icon: Wallet },
+		{ href: '/dashboard/team', label: 'Team', icon: UsersRound },
+		{ href: '/dashboard/marketing', label: 'Marketing', icon: Megaphone },
 		{ href: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
 		{ href: '/dashboard/settings', label: 'Settings', icon: Settings }
 	];
