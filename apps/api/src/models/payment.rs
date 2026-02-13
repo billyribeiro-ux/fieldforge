@@ -29,7 +29,6 @@ pub struct Payment {
 
 #[derive(Debug, Deserialize)]
 pub struct RecordPaymentRequest {
-    pub invoice_id: Uuid,
     pub amount: rust_decimal::Decimal,
     pub payment_method: String,
     pub tip_amount: Option<rust_decimal::Decimal>,

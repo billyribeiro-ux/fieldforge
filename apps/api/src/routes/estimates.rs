@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
-use axum::routing::{get, patch, post};
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde_json::json;
 use uuid::Uuid;
@@ -28,6 +28,8 @@ async fn create_estimate(
 ) -> ApiResult<Json<serde_json::Value>> {
     let team_id = Uuid::nil(); // placeholder — from auth
 
+    let mut tx = state.db.begin().await?;
+
     // Generate estimate number
     let estimate_number = sqlx::query_scalar::<_, String>(
         r#"
@@ -37,9 +39,8 @@ async fn create_estimate(
         "#,
     )
     .bind(team_id)
-    .fetch_one(&state.db)
-    .await
-    .unwrap_or_else(|_| "EST-0001".to_string());
+    .fetch_one(&mut *tx)
+    .await?;
 
     // Create estimate
     let estimate_id = Uuid::new_v4();
@@ -47,7 +48,7 @@ async fn create_estimate(
         "SELECT COALESCE(tax_rate, 0) FROM teams WHERE id = $1",
     )
     .bind(team_id)
-    .fetch_one(&state.db)
+    .fetch_one(&mut *tx)
     .await
     .unwrap_or_default();
 
@@ -93,7 +94,7 @@ async fn create_estimate(
     .bind(req.valid_until)
     .bind(&req.payment_terms)
     .bind(&req.warranty_terms)
-    .fetch_one(&state.db)
+    .fetch_one(&mut *tx)
     .await?;
 
     // Insert line items
@@ -115,7 +116,7 @@ async fn create_estimate(
         .bind(line_total)
         .bind(item.taxable.unwrap_or(true))
         .bind(item.sort_order.unwrap_or(i as i32))
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
     }
 
@@ -124,8 +125,10 @@ async fn create_estimate(
         "SELECT * FROM line_items WHERE estimate_id = $1 ORDER BY sort_order",
     )
     .bind(estimate_id)
-    .fetch_all(&state.db)
+    .fetch_all(&mut *tx)
     .await?;
+
+    tx.commit().await?;
 
     Ok(Json(json!({
         "data": {
@@ -285,12 +288,24 @@ async fn approve_estimate(
     .await?
     .ok_or_else(|| ApiError::BadRequest("Estimate must be sent or viewed to approve".into()))?;
 
-    // Auto-create job if linked
-    if estimate.job_id.is_some() {
-        sqlx::query("UPDATE jobs SET status = 'approved'::job_status WHERE id = $1")
-            .bind(estimate.job_id)
-            .execute(&state.db)
-            .await?;
+    // Auto-update job status if linked (only if transition is valid)
+    if let Some(job_id) = estimate.job_id {
+        let job = sqlx::query_as::<_, crate::models::job::Job>(
+            "SELECT * FROM jobs WHERE id = $1 AND team_id = $2",
+        )
+        .bind(job_id)
+        .bind(team_id)
+        .fetch_optional(&state.db)
+        .await?;
+
+        if let Some(job) = job {
+            if crate::services::job_service::is_valid_transition(&job.status, &"approved".to_string()) {
+                sqlx::query("UPDATE jobs SET status = 'approved'::job_status WHERE id = $1")
+                    .bind(job_id)
+                    .execute(&state.db)
+                    .await?;
+            }
+        }
     }
 
     Ok(Json(json!({
@@ -342,13 +357,15 @@ async fn convert_to_invoice(
 ) -> ApiResult<Json<serde_json::Value>> {
     let team_id = Uuid::nil();
 
+    let mut tx = state.db.begin().await?;
+
     // Get approved estimate
     let estimate = sqlx::query_as::<_, crate::models::estimate::Estimate>(
         "SELECT * FROM estimates WHERE id = $1 AND team_id = $2 AND status = 'approved'::estimate_status AND deleted_at IS NULL",
     )
     .bind(id)
     .bind(team_id)
-    .fetch_optional(&state.db)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or_else(|| ApiError::BadRequest("Only approved estimates can be converted to invoices".into()))?;
 
@@ -361,9 +378,8 @@ async fn convert_to_invoice(
         "#,
     )
     .bind(team_id)
-    .fetch_one(&state.db)
-    .await
-    .unwrap_or_else(|_| "FF-0001".to_string());
+    .fetch_one(&mut *tx)
+    .await?;
 
     // Create invoice from estimate
     let invoice_id = Uuid::new_v4();
@@ -390,7 +406,7 @@ async fn convert_to_invoice(
     .bind(estimate.total)
     .bind(chrono::Utc::now().date_naive() + chrono::Duration::days(30))
     .bind(&estimate.payment_terms)
-    .fetch_one(&state.db)
+    .fetch_one(&mut *tx)
     .await?;
 
     // Copy line items from estimate to invoice
@@ -403,14 +419,16 @@ async fn convert_to_invoice(
     )
     .bind(id)
     .bind(invoice_id)
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await?;
 
     // Update estimate status
     sqlx::query("UPDATE estimates SET status = 'converted'::estimate_status WHERE id = $1")
         .bind(id)
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
+
+    tx.commit().await?;
 
     Ok(Json(json!({
         "data": invoice,

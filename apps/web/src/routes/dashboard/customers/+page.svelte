@@ -3,6 +3,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import CreateCustomerForm from '$lib/components/customers/CreateCustomerForm.svelte';
 	import {
 		Plus,
 		Search,
@@ -14,6 +15,7 @@
 		Users
 	} from 'lucide-svelte';
 
+	let showCreateCustomer = $state(false);
 	let searchQuery = $state('');
 	let viewMode = $state<'table' | 'grid'>('table');
 
@@ -48,12 +50,14 @@
 
 <TopBar title="Customers">
 	{#snippet actions()}
-		<Button variant="primary" size="md">
+		<Button variant="primary" size="md" onclick={() => (showCreateCustomer = true)}>
 			<Plus class="w-4 h-4" />
 			Add Customer
 		</Button>
 	{/snippet}
 </TopBar>
+
+<CreateCustomerForm bind:open={showCreateCustomer} onclose={() => (showCreateCustomer = false)} />
 
 <div class="p-6 space-y-4">
 	<!-- Search & Filters -->

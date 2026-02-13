@@ -19,6 +19,7 @@ pub struct TimeEntry {
     pub longitude_start: Option<f64>,
     pub latitude_end: Option<f64>,
     pub longitude_end: Option<f64>,
+    pub sync_status: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

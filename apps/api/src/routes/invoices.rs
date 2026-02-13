@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
-use axum::routing::{get, patch, post};
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde_json::json;
 use uuid::Uuid;
@@ -27,6 +27,8 @@ async fn create_invoice(
 ) -> ApiResult<Json<serde_json::Value>> {
     let team_id = Uuid::nil();
 
+    let mut tx = state.db.begin().await?;
+
     let invoice_number = sqlx::query_scalar::<_, String>(
         r#"
         UPDATE teams SET invoice_next_number = invoice_next_number + 1
@@ -35,16 +37,15 @@ async fn create_invoice(
         "#,
     )
     .bind(team_id)
-    .fetch_one(&state.db)
-    .await
-    .unwrap_or_else(|_| "FF-0001".to_string());
+    .fetch_one(&mut *tx)
+    .await?;
 
     let invoice_id = Uuid::new_v4();
     let tax_rate: rust_decimal::Decimal = sqlx::query_scalar(
         "SELECT COALESCE(tax_rate, 0) FROM teams WHERE id = $1",
     )
     .bind(team_id)
-    .fetch_one(&state.db)
+    .fetch_one(&mut *tx)
     .await
     .unwrap_or_default();
 
@@ -59,8 +60,9 @@ async fn create_invoice(
         }
     }
 
-    let tax_amount = taxable_subtotal * tax_rate / rust_decimal::Decimal::from(100);
-    let total = subtotal + tax_amount;
+    let discount_amount = req.discount_amount.unwrap_or_default();
+    let tax_amount = (taxable_subtotal - discount_amount).max(rust_decimal::Decimal::ZERO) * tax_rate / rust_decimal::Decimal::from(100);
+    let total = subtotal - discount_amount + tax_amount;
 
     let due_date = req.due_date.unwrap_or_else(|| {
         (chrono::Utc::now() + chrono::Duration::days(30)).date_naive()
@@ -69,8 +71,8 @@ async fn create_invoice(
     let invoice = sqlx::query_as::<_, crate::models::invoice::Invoice>(
         r#"
         INSERT INTO invoices (id, team_id, job_id, estimate_id, customer_id, property_id, invoice_number,
-                              subtotal, tax_amount, tax_rate, total, amount_due, due_date, payment_terms, notes)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $11, $12, $13, $14)
+                              subtotal, discount_amount, tax_amount, tax_rate, total, amount_due, due_date, payment_terms, notes)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $12, $13, $14, $15)
         RETURNING *
         "#,
     )
@@ -82,13 +84,14 @@ async fn create_invoice(
     .bind(req.property_id)
     .bind(&invoice_number)
     .bind(subtotal)
+    .bind(discount_amount)
     .bind(tax_amount)
     .bind(tax_rate)
     .bind(total)
     .bind(due_date)
     .bind(&req.payment_terms)
     .bind(&req.notes)
-    .fetch_one(&state.db)
+    .fetch_one(&mut *tx)
     .await?;
 
     for (i, item) in req.line_items.iter().enumerate() {
@@ -109,7 +112,7 @@ async fn create_invoice(
         .bind(line_total)
         .bind(item.taxable.unwrap_or(true))
         .bind(item.sort_order.unwrap_or(i as i32))
-        .execute(&state.db)
+        .execute(&mut *tx)
         .await?;
     }
 
@@ -117,8 +120,10 @@ async fn create_invoice(
         "SELECT * FROM line_items WHERE invoice_id = $1 ORDER BY sort_order",
     )
     .bind(invoice_id)
-    .fetch_all(&state.db)
+    .fetch_all(&mut *tx)
     .await?;
+
+    tx.commit().await?;
 
     Ok(Json(json!({
         "data": { "invoice": invoice, "line_items": line_items },
@@ -279,18 +284,32 @@ async fn record_payment(
     let team_id = Uuid::nil();
     let user_id = Uuid::nil();
 
-    // Get invoice
+    // Validate payment amount
+    if req.amount <= rust_decimal::Decimal::ZERO {
+        return Err(ApiError::Validation("Payment amount must be greater than zero".into()));
+    }
+
+    let mut tx = state.db.begin().await?;
+
+    // Get invoice (lock row with FOR UPDATE to prevent concurrent payment races)
     let invoice = sqlx::query_as::<_, crate::models::invoice::Invoice>(
-        "SELECT * FROM invoices WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL",
+        "SELECT * FROM invoices WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL FOR UPDATE",
     )
     .bind(invoice_id)
     .bind(team_id)
-    .fetch_optional(&state.db)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or_else(|| ApiError::NotFound("Invoice".into()))?;
 
     if invoice.amount_due <= rust_decimal::Decimal::ZERO {
         return Err(ApiError::BadRequest("Invoice is already fully paid".into()));
+    }
+
+    if req.amount > invoice.amount_due {
+        return Err(ApiError::Validation(format!(
+            "Payment amount {} exceeds amount due {}",
+            req.amount, invoice.amount_due
+        )));
     }
 
     let tip = req.tip_amount.unwrap_or_default();
@@ -316,7 +335,7 @@ async fn record_payment(
     .bind(&req.reference_number)
     .bind(&req.notes)
     .bind(user_id)
-    .fetch_one(&state.db)
+    .fetch_one(&mut *tx)
     .await?;
 
     // Update invoice amounts
@@ -343,7 +362,7 @@ async fn record_payment(
     .bind(new_amount_paid)
     .bind(new_amount_due)
     .bind(new_status)
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await?;
 
     // Update customer lifetime value and outstanding balance
@@ -357,8 +376,10 @@ async fn record_payment(
     )
     .bind(invoice.customer_id)
     .bind(req.amount)
-    .execute(&state.db)
+    .execute(&mut *tx)
     .await?;
+
+    tx.commit().await?;
 
     tracing::info!(invoice_id = %invoice_id, amount = %req.amount, "Payment recorded");
 

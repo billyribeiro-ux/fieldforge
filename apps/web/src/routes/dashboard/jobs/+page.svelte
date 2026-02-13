@@ -4,6 +4,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
+	import CreateJobForm from '$lib/components/jobs/CreateJobForm.svelte';
 	import {
 		Plus,
 		Filter,
@@ -15,6 +16,7 @@
 		ChevronDown
 	} from 'lucide-svelte';
 
+	let showCreateJob = $state(false);
 	let searchQuery = $state('');
 	let statusFilter = $state('all');
 	let priorityFilter = $state('all');
@@ -87,12 +89,14 @@
 
 <TopBar title="Jobs">
 	{#snippet actions()}
-		<Button variant="primary" size="md">
+		<Button variant="primary" size="md" onclick={() => (showCreateJob = true)}>
 			<Plus class="w-4 h-4" />
 			New Job
 		</Button>
 	{/snippet}
 </TopBar>
+
+<CreateJobForm bind:open={showCreateJob} onclose={() => (showCreateJob = false)} />
 
 <div class="p-6 space-y-4">
 	<!-- Filters -->

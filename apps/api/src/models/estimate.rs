@@ -36,6 +36,7 @@ pub struct Estimate {
     pub declined_at: Option<DateTime<Utc>>,
     pub decline_reason: Option<String>,
     pub portal_token: String,
+    pub pdf_url: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub deleted_at: Option<DateTime<Utc>>,
