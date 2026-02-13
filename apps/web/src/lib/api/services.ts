@@ -7,6 +7,9 @@ import type {
 	TimeEntry, StartTimerRequest, StopTimerRequest,
 	Photo, User, Team, Property, Note, Notification,
 	InventoryItem, Vehicle, Checklist, ChecklistItem,
+	AutomationRule, CreateAutomationRuleRequest,
+	License, CreateLicenseRequest,
+	InsurancePolicy, CreateInsurancePolicyRequest,
 	PaginatedResponse, ApiResponse
 } from '$lib/types';
 
@@ -329,6 +332,49 @@ export const payments = {
 };
 
 // ── Notifications ──
+
+// ── Automation Rules ──
+
+export const automationRules = {
+	list: () =>
+		api.get<AutomationRule[]>('/automation-rules'),
+	get: (id: string) =>
+		api.get<AutomationRule>(`/automation-rules/${id}`),
+	create: (data: CreateAutomationRuleRequest) =>
+		api.post<AutomationRule>('/automation-rules', data),
+	update: (id: string, data: Partial<CreateAutomationRuleRequest>) =>
+		api.patch<AutomationRule>(`/automation-rules/${id}`, data),
+	delete: (id: string) =>
+		api.delete<null>(`/automation-rules/${id}`),
+	toggle: (id: string) =>
+		api.post<AutomationRule>(`/automation-rules/${id}/toggle`, {}),
+};
+
+// ── Licenses ──
+
+export const licenses = {
+	list: () =>
+		api.get<License[]>('/licenses'),
+	get: (id: string) =>
+		api.get<License>(`/licenses/${id}`),
+	create: (data: CreateLicenseRequest) =>
+		api.post<License>('/licenses', data),
+	delete: (id: string) =>
+		api.delete<null>(`/licenses/${id}`),
+};
+
+// ── Insurance Policies ──
+
+export const insurancePolicies = {
+	list: () =>
+		api.get<InsurancePolicy[]>('/insurance-policies'),
+	get: (id: string) =>
+		api.get<InsurancePolicy>(`/insurance-policies/${id}`),
+	create: (data: CreateInsurancePolicyRequest) =>
+		api.post<InsurancePolicy>('/insurance-policies', data),
+	delete: (id: string) =>
+		api.delete<null>(`/insurance-policies/${id}`),
+};
 
 export const notifications = {
 	list: (params?: Record<string, string>) =>

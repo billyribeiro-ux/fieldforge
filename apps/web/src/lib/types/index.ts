@@ -696,6 +696,93 @@ export interface Webhook {
 	updated_at: string;
 }
 
+// ── Automation Rule ──
+
+export interface AutomationRule {
+	id: string;
+	team_id: string;
+	name: string;
+	trigger_event: string;
+	conditions: Record<string, unknown>;
+	actions: Record<string, unknown>;
+	delay_minutes: number;
+	is_active: boolean;
+	last_triggered_at: string | null;
+	trigger_count: number;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CreateAutomationRuleRequest {
+	name: string;
+	trigger_event: string;
+	conditions?: Record<string, unknown>;
+	actions: Record<string, unknown>;
+	delay_minutes?: number;
+}
+
+// ── License ──
+
+export interface License {
+	id: string;
+	team_id: string;
+	user_id: string | null;
+	license_type: string;
+	license_number: string;
+	issuing_state: string | null;
+	issuing_authority: string | null;
+	issued_date: string | null;
+	expiry_date: string | null;
+	status: string;
+	document_url: string | null;
+	reminder_sent_90: boolean;
+	reminder_sent_60: boolean;
+	reminder_sent_30: boolean;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CreateLicenseRequest {
+	license_type: string;
+	license_number: string;
+	user_id?: string;
+	issuing_state?: string;
+	issuing_authority?: string;
+	issued_date?: string;
+	expiry_date?: string;
+}
+
+// ── Insurance Policy ──
+
+export interface InsurancePolicy {
+	id: string;
+	team_id: string;
+	policy_type: string;
+	provider: string;
+	policy_number: string;
+	coverage_amount: number | null;
+	premium_amount: number | null;
+	effective_date: string;
+	expiry_date: string;
+	document_url: string | null;
+	auto_renew: boolean;
+	notes: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CreateInsurancePolicyRequest {
+	policy_type: string;
+	provider: string;
+	policy_number: string;
+	coverage_amount?: number;
+	premium_amount?: number;
+	effective_date: string;
+	expiry_date: string;
+	auto_renew?: boolean;
+	notes?: string;
+}
+
 // ── Search ──
 
 export interface SearchResults {
