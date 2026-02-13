@@ -82,6 +82,10 @@
 	let activeTab = $state<'overview' | 'jobs' | 'invoices' | 'communication' | 'properties'>('overview');
 </script>
 
+<svelte:head>
+	<title>Customer Detail — FieldForge</title>
+</svelte:head>
+
 <TopBar>
 	{#snippet actions()}
 		<div class="flex items-center gap-2">

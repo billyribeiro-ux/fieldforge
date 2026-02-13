@@ -76,6 +76,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Estimate Detail — FieldForge</title>
+</svelte:head>
+
 <TopBar>
 	{#snippet actions()}
 		<div class="flex items-center gap-2">

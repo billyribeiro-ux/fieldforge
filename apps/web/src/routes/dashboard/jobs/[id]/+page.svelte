@@ -112,6 +112,10 @@
 	let completedCount = $derived(checklistItems.filter(c => c.done).length);
 </script>
 
+<svelte:head>
+	<title>Job Detail — FieldForge</title>
+</svelte:head>
+
 <TopBar>
 	{#snippet actions()}
 		<div class="flex items-center gap-2">
