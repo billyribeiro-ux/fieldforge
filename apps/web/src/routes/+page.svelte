@@ -12,6 +12,19 @@
 	});
 </script>
 
+<svelte:head>
+	<title>FieldForge — The #1 Job Management Platform for Tradespeople</title>
+	<meta name="description" content="FieldForge helps HVAC, plumbing, electrical, and contracting businesses manage jobs, customers, estimates, invoices, scheduling, inventory, and fleet — all in one platform." />
+	<meta name="keywords" content="field service management, HVAC software, plumbing software, job management, estimate builder, invoice software, scheduling, inventory tracking, fleet management" />
+	<meta property="og:title" content="FieldForge — Job Management for Tradespeople" />
+	<meta property="og:description" content="Manage jobs, customers, estimates, invoices, scheduling, inventory, and fleet in one platform built for trades." />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://fieldforge.com" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="FieldForge — Job Management for Tradespeople" />
+	<meta name="twitter:description" content="The all-in-one platform for HVAC, plumbing, electrical, and contracting businesses." />
+</svelte:head>
+
 <div class="min-h-screen bg-surface-50">
 	<!-- Hero -->
 	<header class="border-b border-surface-200 bg-white">
