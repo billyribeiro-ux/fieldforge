@@ -15,7 +15,11 @@ pub mod time_entries;
 pub mod webhooks;
 pub mod checklists;
 pub mod equipment;
+pub mod expenses;
+pub mod messages;
 pub mod notifications;
+pub mod reviews;
+pub mod service_plans;
 pub mod vehicles;
 
 use std::sync::Arc;
@@ -38,6 +42,10 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(vehicles::router())
         .merge(checklists::router())
         .merge(equipment::router())
+        .merge(expenses::router())
+        .merge(messages::router())
+        .merge(reviews::router())
+        .merge(service_plans::router())
         .merge(teams::router())
         .merge(search::router())
         .merge(audit::router())
