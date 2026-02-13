@@ -11,9 +11,9 @@ Built for HVAC, plumbing, electrical, roofing, painting, landscaping, and genera
 ```
 fieldforge/
 ├── apps/
-│   ├── api/             # Rust/Axum backend — 19 route modules
-│   ├── web/             # SvelteKit 5 dashboard + customer portal
-│   └── ai/              # Python/FastAPI AI/ML services
+│   ├── api/             # Rust/Axum backend — 35 route modules, 27 models
+│   ├── web/             # SvelteKit 5 dashboard (32 pages) + customer portal
+│   └── ai/              # Python/FastAPI AI/ML services (5 route modules)
 ├── infrastructure/
 │   └── terraform/       # AWS infrastructure (VPC, RDS, ECS, S3, CloudFront)
 ├── mobile/
@@ -81,13 +81,21 @@ fieldforge/
 | Page | Features |
 |------|----------|
 | **Dashboard** | KPI stats, recent jobs, quick actions |
-| **Jobs** | List + filters, detail page (status pipeline, checklist, timer, photos, notes), create modal |
-| **Customers** | List + search, detail page (tabs: overview, jobs, invoices, communication, properties), create modal |
+| **Jobs** | List + filters, detail page (status pipeline, checklist, timer, photos, notes), creation form |
+| **Customers** | List + search, detail page (tabs: overview, jobs, invoices, communication, properties), creation form |
 | **Estimates** | List, detail page (document view, portal link, activity), builder (line items, live totals, discount/tax) |
-| **Invoices** | List, detail page (document view, payment recording modal, portal link) |
+| **Invoices** | List, detail page (document view, payment recording modal, portal link), creation form |
 | **Schedule** | Weekly calendar view |
+| **Dispatch** | Technician cards, unassigned jobs, map placeholder |
+| **Payments** | Payment list, filters, refund support |
 | **Inventory** | Stock tracking, low stock alerts, category filters |
 | **Fleet** | Vehicle cards, service due alerts, mileage tracking |
+| **Expenses** | Expense tracking, categories, billable/reimbursable |
+| **Team** | Member list, roles, invite, deactivate |
+| **Marketing** | Reviews, referrals, reputation management |
+| **Compliance** | Licenses & certifications, insurance policies, expiry tracking |
+| **Automation** | Rule management, trigger/action config, toggle active/inactive |
+| **Notifications** | Notification list, unread filter, mark read |
 | **Reports** | KPIs, revenue by trade, top customers, technician performance |
 | **Settings** | Company profile, team members, billing, notifications, integrations, templates, appearance, security |
 
@@ -95,8 +103,8 @@ fieldforge/
 - **Estimate view** — approve/decline with optional reason
 - **Invoice view** — online payment (card, ACH, Apple Pay, Google Pay)
 
-### UI Components (24)
-Avatar, Badge, Breadcrumb, Button, Card, CommandPalette (⌘K), ConfirmDialog, DataTable, Dropdown, EmptyState, ErrorBoundary, FileUpload, Input, Modal, Pagination, Progress, Select, Skeleton, StatusBadge, Switch, Tabs, Textarea, Toast, Tooltip
+### UI Components (25)
+Avatar, Badge, Breadcrumb, Button, Card, CommandPalette (⌘K), ConfirmDialog, DataTable, Drawer, Dropdown, EmptyState, ErrorBoundary, FileUpload, Input, Modal, Pagination, Progress, Select, Skeleton, StatusBadge, Switch, Tabs, Textarea, Toast, Tooltip
 
 ### Middleware (4)
 Auth (JWT), CORS, Request ID, Rate Limiting (100 req/60s per IP)
@@ -214,9 +222,11 @@ cd apps/web && pnpm build
 - [x] **Phase 38** — documents, recurring_rules, tags routes wired (30 → 35 API modules)
 - [x] **Phase 39** — README updated with 35 API route modules
 - [x] **Phase 40** — Skip-to-content accessibility link, final polish
-- [ ] **Phase 41** — Mobile apps (iOS + Android)
-- [ ] **Phase 42** — AI/ML features (photo estimation, smart scheduling)
-- [ ] **Phase 43** — Production deployment, performance tuning, security audit
+- [x] **Phase 41** — Compliance & automation pages, accessibility improvements
+- [x] **Phase 42** — Job/customer creation pages, OpenAPI spec update (all 35 routes documented)
+- [ ] **Phase 43** — Mobile apps (iOS + Android)
+- [ ] **Phase 44** — AI/ML features (photo estimation, smart scheduling, predictive analytics)
+- [ ] **Phase 45** — Production deployment, performance tuning, security audit
 
 ## License
 
