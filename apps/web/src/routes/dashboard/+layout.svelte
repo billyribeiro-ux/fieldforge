@@ -9,7 +9,7 @@
 <div class="flex min-h-screen">
 	<Sidebar />
 
-	<main class="flex-1 ml-[var(--spacing-sidebar)] transition-all duration-[var(--transition-slow)]">
+	<main class="flex-1 ml-0 lg:ml-[var(--spacing-sidebar)] transition-all duration-[var(--transition-slow)]">
 		{@render children()}
 	</main>
 </div>

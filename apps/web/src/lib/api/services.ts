@@ -15,6 +15,11 @@ interface InventoryStock { id: string; item_id: string; location_id: string; qua
 interface InventoryLocation { id: string; team_id: string; name: string; location_type: string; vehicle_id: string | null; address: string | null; is_active: boolean; created_at: string; updated_at: string; }
 interface VehicleMaintenance { id: string; vehicle_id: string; maintenance_type: string; description: string | null; provider: string | null; cost: number | null; odometer: number | null; performed_at: string; next_due_date: string | null; next_due_odometer: number | null; notes: string | null; created_at: string; }
 interface Equipment { id: string; team_id: string; name: string; category: string | null; brand: string | null; model: string | null; serial_number: string | null; condition: string; assigned_to: string | null; is_active: boolean; created_at: string; updated_at: string; }
+interface Expense { id: string; team_id: string; user_id: string | null; job_id: string | null; vehicle_id: string | null; category: string; description: string; amount: number; tax_amount: number | null; vendor: string | null; expense_date: string; is_billable: boolean; is_reimbursable: boolean; reimbursed: boolean; notes: string | null; created_at: string; updated_at: string; }
+interface ServicePlan { id: string; team_id: string; name: string; description: string | null; price_monthly: number | null; price_quarterly: number | null; price_annual: number | null; visits_per_year: number; discount_pct: number | null; priority_scheduling: boolean; is_active: boolean; created_at: string; updated_at: string; }
+interface CustomerServicePlan { id: string; service_plan_id: string; customer_id: string; team_id: string; billing_frequency: string; start_date: string; end_date: string | null; auto_renew: boolean; status: string; visits_used: number; created_at: string; updated_at: string; }
+interface Message { id: string; team_id: string; customer_id: string; job_id: string | null; direction: string; channel: string; status: string; body: string; subject: string | null; sent_at: string | null; created_at: string; }
+interface Review { id: string; team_id: string; customer_id: string | null; job_id: string | null; platform: string; rating: number; content: string | null; reviewer_name: string | null; response: string | null; responded_at: string | null; created_at: string; updated_at: string; }
 
 // ── Customers ──
 
@@ -246,6 +251,70 @@ export const equipment = {
 export const search = {
 	global: (q: string, type?: string) =>
 		api.get<Record<string, unknown[]>>('/search', { q, ...(type ? { type } : {}) }),
+};
+
+// ── Expenses ──
+
+export const expenses = {
+	list: (params?: Record<string, string>) =>
+		api.get<Expense[]>('/expenses', params),
+	get: (id: string) =>
+		api.get<Expense>(`/expenses/${id}`),
+	create: (data: { category: string; description: string; amount: number; expense_date: string; job_id?: string; vehicle_id?: string; vendor?: string; is_billable?: boolean; notes?: string }) =>
+		api.post<Expense>('/expenses', data),
+	update: (id: string, data: Partial<Expense>) =>
+		api.patch<Expense>(`/expenses/${id}`, data),
+	delete: (id: string) =>
+		api.delete<null>(`/expenses/${id}`),
+	listForJob: (jobId: string) =>
+		api.get<Expense[]>(`/jobs/${jobId}/expenses`),
+};
+
+// ── Service Plans ──
+
+export const servicePlans = {
+	list: () =>
+		api.get<ServicePlan[]>('/service-plans'),
+	get: (id: string) =>
+		api.get<{ plan: ServicePlan; active_enrollments: number }>(`/service-plans/${id}`),
+	create: (data: { name: string; description?: string; price_monthly?: number; price_annual?: number; visits_per_year?: number }) =>
+		api.post<ServicePlan>('/service-plans', data),
+	update: (id: string, data: Partial<ServicePlan>) =>
+		api.patch<ServicePlan>(`/service-plans/${id}`, data),
+	delete: (id: string) =>
+		api.delete<null>(`/service-plans/${id}`),
+	enrollCustomer: (planId: string, data: { customer_id: string; billing_frequency?: string; start_date: string }) =>
+		api.post<CustomerServicePlan>(`/service-plans/${planId}/enroll`, data),
+	listForCustomer: (customerId: string) =>
+		api.get<CustomerServicePlan[]>(`/customers/${customerId}/service-plans`),
+};
+
+// ── Messages ──
+
+export const messages = {
+	list: () =>
+		api.get<Message[]>('/messages'),
+	get: (id: string) =>
+		api.get<Message>(`/messages/${id}`),
+	send: (data: { customer_id: string; channel: string; body: string; job_id?: string; subject?: string }) =>
+		api.post<Message>('/messages', data),
+	listForCustomer: (customerId: string) =>
+		api.get<Message[]>(`/customers/${customerId}/messages`),
+	listForJob: (jobId: string) =>
+		api.get<Message[]>(`/jobs/${jobId}/messages`),
+};
+
+// ── Reviews ──
+
+export const reviews = {
+	list: () =>
+		api.get<Review[]>('/reviews'),
+	get: (id: string) =>
+		api.get<Review>(`/reviews/${id}`),
+	create: (data: { platform: string; rating: number; content?: string; reviewer_name?: string; customer_id?: string; job_id?: string }) =>
+		api.post<Review>('/reviews', data),
+	respond: (id: string, response: string) =>
+		api.post<Review>(`/reviews/${id}/respond`, { response }),
 };
 
 // ── Notifications ──
