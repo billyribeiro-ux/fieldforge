@@ -4,7 +4,9 @@ pub mod estimates;
 pub mod health;
 pub mod invoices;
 pub mod jobs;
+pub mod notes;
 pub mod photos;
+pub mod properties;
 pub mod teams;
 pub mod time_entries;
 
@@ -22,5 +24,7 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(invoices::router())
         .merge(time_entries::router())
         .merge(photos::router())
+        .merge(properties::router())
+        .merge(notes::router())
         .merge(teams::router())
 }
