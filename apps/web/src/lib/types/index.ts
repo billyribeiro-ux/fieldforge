@@ -535,3 +535,62 @@ export interface Notification {
 	read_at: string | null;
 	created_at: string;
 }
+
+// ── Audit Log ──
+
+export interface AuditLogEntry {
+	id: string;
+	team_id: string;
+	user_id: string | null;
+	action: string;
+	entity_type: string;
+	entity_id: string | null;
+	old_values: Record<string, unknown> | null;
+	new_values: Record<string, unknown> | null;
+	ip_address: string | null;
+	user_agent: string | null;
+	created_at: string;
+}
+
+// ── Webhook ──
+
+export interface Webhook {
+	id: string;
+	team_id: string;
+	url: string;
+	secret: string;
+	events: string[];
+	is_active: boolean;
+	last_triggered_at: string | null;
+	last_status_code: number | null;
+	failure_count: number;
+	created_at: string;
+	updated_at: string;
+}
+
+// ── Search ──
+
+export interface SearchResults {
+	jobs?: Job[];
+	customers?: Customer[];
+	estimates?: Estimate[];
+	invoices?: Invoice[];
+}
+
+// ── API Response Types ──
+
+export interface ApiResponse<T> {
+	data: T;
+	meta: Record<string, unknown> | null;
+	errors: Array<{ code: string; message: string }> | null;
+}
+
+export interface PaginatedResponse<T> {
+	data: T[];
+	meta: {
+		has_more: boolean;
+		cursor?: string;
+		total?: number;
+	};
+	errors: null;
+}

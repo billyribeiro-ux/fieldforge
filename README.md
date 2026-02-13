@@ -36,12 +36,12 @@ fieldforge/
 | **Infrastructure** | AWS ECS Fargate, RDS, ElastiCache, S3, CloudFront |
 | **CI/CD** | GitHub Actions (Rust, Node, Python) |
 
-## API Routes (19 modules)
+## API Routes (23 modules)
 
 | Module | Endpoints |
 |--------|-----------|
-| `health` | `GET /health` |
-| `auth` | Register, login (JWT + Argon2) |
+| `health` | `GET /health`, `GET /health/ready` (DB + Redis checks) |
+| `auth` | Register, login, `/auth/me` (JWT + Argon2) |
 | `customers` | CRUD, search, stats |
 | `jobs` | CRUD, FSM status transitions (14 states) |
 | `estimates` | CRUD, line items, send/approve/decline, convert to invoice, duplicate |
@@ -55,8 +55,12 @@ fieldforge/
 | `vehicles` | CRUD, maintenance tracking |
 | `checklists` | CRUD, item completion |
 | `equipment` | CRUD, assignment |
+| `expenses` | CRUD, filters by category/date/billable |
+| `messages` | CRUD, conversations |
+| `reviews` | CRUD, customer reviews |
+| `service_plans` | CRUD, maintenance agreements |
 | `search` | Global search across jobs, customers, estimates, invoices |
-| `audit` | Paginated audit log with filters |
+| `audit` | Paginated audit log with entity/user/action filters |
 | `webhooks` | CRUD, HMAC secret generation, test endpoint |
 | `notifications` | List, mark read, mark all read, unread count |
 
@@ -79,8 +83,16 @@ fieldforge/
 - **Estimate view** — approve/decline with optional reason
 - **Invoice view** — online payment (card, ACH, Apple Pay, Google Pay)
 
-### UI Components
-Button, Badge, Card, Input, Select, Textarea, Modal, Sidebar, TopBar (with notification dropdown), StatCard, Skeleton, ErrorBoundary, Toast, CommandPalette (⌘K)
+### UI Components (21)
+Avatar, Badge, Breadcrumb, Button, Card, CommandPalette (⌘K), Dropdown, EmptyState, ErrorBoundary, Input, Modal, Pagination, Progress, Select, Skeleton, StatusBadge, Switch, Tabs, Textarea, Toast, Tooltip
+
+### Middleware (4)
+Auth (JWT), CORS, Request ID, Rate Limiting (100 req/60s per IP)
+
+### Server-Side Features
+- `hooks.server.ts` — auth token extraction from cookies, user profile fetch
+- `+layout.server.ts` — dashboard auth guard, user data propagation
+- `+page.server.ts` — SSR load functions for jobs, customers, estimates, invoices, dashboard (parallel fetch with `Promise.allSettled`)
 
 ## Getting Started
 
@@ -146,9 +158,19 @@ cd apps/web && pnpm build
 - [x] **Phase 5** — Search, audit, webhook routes, notification dropdown
 - [x] **Phase 6** — API service layer, toast system, command palette, notification routes
 - [x] **Phase 7** — Skeleton loader, error boundary, comprehensive README
-- [ ] **Phase 8** — Mobile apps (iOS + Android)
-- [ ] **Phase 9** — AI/ML features (photo estimation, smart scheduling)
-- [ ] **Phase 10** — Production deployment, performance tuning, security audit
+- [x] **Phase 8** — Responsive mobile sidebar, form validation utility
+- [x] **Phase 9** — Request ID middleware, formatting utilities (currency, date, phone, address)
+- [x] **Phase 10** — EmptyState, Avatar, Breadcrumb components, enhanced health check
+- [x] **Phase 11** — Dropdown, Tabs, Pagination, StatusBadge components
+- [x] **Phase 12** — Tooltip, Progress, Switch components, barrel export (21 components)
+- [x] **Phase 13** — Rate limiting middleware, global error page
+- [x] **Phase 14** — Server-side auth (hooks.server.ts, layout guard, app.d.ts types)
+- [x] **Phase 15** — SSR load functions (jobs, customers, estimates, invoices, dashboard)
+- [x] **Phase 16** — /auth/me endpoint, verify_token, server API client
+- [x] **Phase 17** — Final types (AuditLog, Webhook, SearchResults), rate limiting wired, README update
+- [ ] **Phase 18** — Mobile apps (iOS + Android)
+- [ ] **Phase 19** — AI/ML features (photo estimation, smart scheduling)
+- [ ] **Phase 20** — Production deployment, performance tuning, security audit
 
 ## License
 
