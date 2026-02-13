@@ -783,6 +783,136 @@ export interface CreateInsurancePolicyRequest {
 	notes?: string;
 }
 
+// ── Recurring Rule ──
+
+export interface RecurringRule {
+	id: string;
+	team_id: string;
+	customer_id: string;
+	property_id: string | null;
+	title: string;
+	description: string | null;
+	frequency: string;
+	interval_value: number;
+	day_of_week: number | null;
+	day_of_month: number | null;
+	month_of_year: number | null;
+	start_date: string;
+	end_date: string | null;
+	next_occurrence: string | null;
+	estimated_duration_minutes: number | null;
+	assigned_to: string | null;
+	job_type: string | null;
+	priority: string;
+	is_active: boolean;
+	auto_schedule: boolean;
+	advance_days: number;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CreateRecurringRuleRequest {
+	customer_id: string;
+	property_id?: string;
+	title: string;
+	description?: string;
+	frequency: string;
+	interval_value?: number;
+	day_of_week?: number;
+	day_of_month?: number;
+	start_date: string;
+	end_date?: string;
+	estimated_duration_minutes?: number;
+	assigned_to?: string;
+	job_type?: string;
+	priority?: string;
+	auto_schedule?: boolean;
+	advance_days?: number;
+}
+
+// ── Document ──
+
+export interface Document {
+	id: string;
+	team_id: string;
+	entity_type: string;
+	entity_id: string;
+	file_name: string;
+	file_url: string;
+	file_size: number;
+	mime_type: string;
+	uploaded_by: string | null;
+	description: string | null;
+	created_at: string;
+}
+
+// ── Signature ──
+
+export interface SignatureRecord {
+	id: string;
+	team_id: string;
+	entity_type: string;
+	entity_id: string;
+	signer_name: string;
+	signer_email: string | null;
+	signature_url: string;
+	ip_address: string | null;
+	signed_at: string;
+	created_at: string;
+}
+
+// ── Fuel Log ──
+
+export interface FuelLog {
+	id: string;
+	vehicle_id: string;
+	team_id: string;
+	gallons: number;
+	cost_per_gallon: number;
+	total_cost: number;
+	odometer: number | null;
+	fuel_type: string | null;
+	station: string | null;
+	filled_by: string | null;
+	filled_at: string;
+	created_at: string;
+}
+
+// ── Purchase Order ──
+
+export interface PurchaseOrder {
+	id: string;
+	team_id: string;
+	job_id: string | null;
+	vendor: string;
+	po_number: string;
+	status: string;
+	subtotal: number;
+	tax: number;
+	total: number;
+	notes: string | null;
+	expected_date: string | null;
+	received_date: string | null;
+	created_by: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
+// ── GPS Location ──
+
+export interface GpsLocation {
+	id: string;
+	team_id: string;
+	user_id: string;
+	latitude: number;
+	longitude: number;
+	accuracy: number | null;
+	speed: number | null;
+	heading: number | null;
+	recorded_at: string;
+	created_at: string;
+}
+
 // ── Search ──
 
 export interface SearchResults {

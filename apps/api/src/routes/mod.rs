@@ -28,6 +28,11 @@ pub mod documents;
 pub mod licenses;
 pub mod recurring_rules;
 pub mod tags;
+pub mod fuel_logs;
+pub mod purchase_orders;
+pub mod gps;
+pub mod portal;
+pub mod stripe;
 
 use std::sync::Arc;
 use axum::Router;
@@ -65,4 +70,9 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(licenses::router())
         .merge(recurring_rules::router())
         .merge(tags::router())
+        .merge(fuel_logs::router())
+        .merge(purchase_orders::router())
+        .merge(gps::router())
+        .merge(portal::router())
+        .merge(stripe::router())
 }

@@ -36,7 +36,7 @@ fieldforge/
 | **Infrastructure** | AWS ECS Fargate, RDS, ElastiCache, S3, CloudFront |
 | **CI/CD** | GitHub Actions (Rust, Node, Python) |
 
-## API Routes (24 modules)
+## API Routes (35 modules)
 
 | Module | Endpoints |
 |--------|-----------|
@@ -64,6 +64,17 @@ fieldforge/
 | `webhooks` | CRUD, HMAC secret generation, test endpoint |
 | `notifications` | List, mark read, mark all read, unread count |
 | `payments` | List payments, get payment, refund with reason |
+| `automation_rules` | CRUD, toggle active/inactive |
+| `documents` | CRUD, signatures |
+| `licenses` | CRUD licenses + insurance policies |
+| `recurring_rules` | CRUD, toggle, generate next occurrence |
+| `tags` | CRUD tags |
+| `fuel_logs` | CRUD fuel logs per vehicle |
+| `purchase_orders` | CRUD purchase orders + line items |
+| `gps` | GPS location tracking, history |
+| `portal` | Public estimate/invoice portal (token-based) |
+| `stripe` | Stripe webhook handler, checkout sessions |
+| `ws` | WebSocket real-time events |
 
 ## Web Dashboard Pages
 
