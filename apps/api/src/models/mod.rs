@@ -20,5 +20,7 @@ pub mod service_plan;
 pub mod vehicle;
 pub mod tag;
 pub mod automation_rule;
+pub mod document;
 pub mod license;
+pub mod recurring_rule;
 pub mod common;

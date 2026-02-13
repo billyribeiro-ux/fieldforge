@@ -24,7 +24,10 @@ pub mod service_plans;
 pub mod vehicles;
 pub mod ws;
 pub mod automation_rules;
+pub mod documents;
 pub mod licenses;
+pub mod recurring_rules;
+pub mod tags;
 
 use std::sync::Arc;
 use axum::Router;
@@ -58,5 +61,8 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(payments::router())
         .merge(ws::router())
         .merge(automation_rules::router())
+        .merge(documents::router())
         .merge(licenses::router())
+        .merge(recurring_rules::router())
+        .merge(tags::router())
 }
