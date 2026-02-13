@@ -43,6 +43,15 @@ tags:
   - name: Licenses
   - name: Insurance Policies
   - name: WebSocket
+  - name: Tags
+  - name: Recurring Rules
+  - name: Documents
+  - name: Signatures
+  - name: Fuel Logs
+  - name: Purchase Orders
+  - name: GPS Tracking
+  - name: Portal
+  - name: Stripe Webhooks
 
 paths:
   # ── Health ──
@@ -814,6 +823,392 @@ paths:
         - { $ref: "#/components/parameters/id" }
       responses:
         "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Tags ──
+  /tags:
+    get:
+      tags: [Tags]
+      summary: List tags
+      operationId: listTags
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Tags]
+      summary: Create a tag
+      operationId: createTag
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /tags/{id}:
+    get:
+      tags: [Tags]
+      summary: Get tag by ID
+      operationId: getTag
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Tags]
+      summary: Delete a tag
+      operationId: deleteTag
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Recurring Rules ──
+  /recurring-rules:
+    get:
+      tags: [Recurring Rules]
+      summary: List recurring job rules
+      operationId: listRecurringRules
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Recurring Rules]
+      summary: Create a recurring rule
+      operationId: createRecurringRule
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /recurring-rules/{id}:
+    get:
+      tags: [Recurring Rules]
+      summary: Get recurring rule by ID
+      operationId: getRecurringRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Recurring Rules]
+      summary: Delete a recurring rule
+      operationId: deleteRecurringRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /recurring-rules/{id}/toggle:
+    post:
+      tags: [Recurring Rules]
+      summary: Toggle recurring rule active/inactive
+      operationId: toggleRecurringRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /recurring-rules/{id}/generate:
+    post:
+      tags: [Recurring Rules]
+      summary: Generate next job from recurring rule
+      operationId: generateFromRecurringRule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Documents ──
+  /documents:
+    get:
+      tags: [Documents]
+      summary: List documents
+      operationId: listDocuments
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: entity_type
+          in: query
+          schema: { type: string }
+        - name: entity_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Documents]
+      summary: Create a document record
+      operationId: createDocument
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /documents/{id}:
+    get:
+      tags: [Documents]
+      summary: Get document by ID
+      operationId: getDocument
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Documents]
+      summary: Delete a document
+      operationId: deleteDocument
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Signatures ──
+  /signatures:
+    get:
+      tags: [Signatures]
+      summary: List signatures
+      operationId: listSignatures
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Signatures]
+      summary: Create a signature record
+      operationId: createSignature
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Fuel Logs ──
+  /vehicles/{vehicle_id}/fuel-logs:
+    get:
+      tags: [Fuel Logs]
+      summary: List fuel logs for a vehicle
+      operationId: listFuelLogs
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: vehicle_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Fuel Logs]
+      summary: Create a fuel log entry
+      operationId: createFuelLog
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: vehicle_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /fuel-logs/{id}:
+    get:
+      tags: [Fuel Logs]
+      summary: Get fuel log by ID
+      operationId: getFuelLog
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Fuel Logs]
+      summary: Delete a fuel log
+      operationId: deleteFuelLog
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Purchase Orders ──
+  /purchase-orders:
+    get:
+      tags: [Purchase Orders]
+      summary: List purchase orders
+      operationId: listPurchaseOrders
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    post:
+      tags: [Purchase Orders]
+      summary: Create a purchase order
+      operationId: createPurchaseOrder
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /purchase-orders/{id}:
+    get:
+      tags: [Purchase Orders]
+      summary: Get purchase order by ID
+      operationId: getPurchaseOrder
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    patch:
+      tags: [Purchase Orders]
+      summary: Update a purchase order
+      operationId: updatePurchaseOrder
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+    delete:
+      tags: [Purchase Orders]
+      summary: Delete a purchase order
+      operationId: deletePurchaseOrder
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /purchase-orders/{id}/receive:
+    post:
+      tags: [Purchase Orders]
+      summary: Mark purchase order as received
+      operationId: receivePurchaseOrder
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: "#/components/parameters/id" }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── GPS Tracking ──
+  /gps/location:
+    post:
+      tags: [GPS Tracking]
+      summary: Update technician GPS location
+      operationId: updateGpsLocation
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [latitude, longitude]
+              properties:
+                latitude: { type: number }
+                longitude: { type: number }
+                accuracy: { type: number }
+                speed: { type: number }
+                heading: { type: number }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /gps/technicians:
+    get:
+      tags: [GPS Tracking]
+      summary: List latest technician locations
+      operationId: listTechnicianLocations
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /gps/technicians/{user_id}/history:
+    get:
+      tags: [GPS Tracking]
+      summary: Get location history for a technician (last 24h)
+      operationId: getTechnicianLocationHistory
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Portal (Public) ──
+  /portal/estimates/{token}:
+    get:
+      tags: [Portal]
+      summary: View estimate via portal token (public)
+      operationId: getEstimateByToken
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /portal/estimates/{token}/approve:
+    post:
+      tags: [Portal]
+      summary: Approve estimate via portal (public)
+      operationId: approveEstimatePortal
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /portal/estimates/{token}/decline:
+    post:
+      tags: [Portal]
+      summary: Decline estimate via portal (public)
+      operationId: declineEstimatePortal
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /portal/invoices/{token}:
+    get:
+      tags: [Portal]
+      summary: View invoice via portal token (public)
+      operationId: getInvoiceByToken
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  /portal/invoices/{token}/pay:
+    post:
+      tags: [Portal]
+      summary: Initiate payment via portal (public)
+      operationId: initiatePortalPayment
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/DataResponse" }
+
+  # ── Stripe Webhooks ──
+  /webhooks/stripe:
+    post:
+      tags: [Stripe Webhooks]
+      summary: Handle Stripe webhook events
+      operationId: handleStripeWebhook
+      description: |
+        Handles: payment_intent.succeeded, payment_intent.payment_failed,
+        charge.refunded, invoice.payment_succeeded, customer.subscription.deleted
+      responses:
+        "200":
+          description: Webhook processed
 
   # ── WebSocket ──
   /ws:
