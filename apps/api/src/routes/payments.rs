@@ -29,7 +29,7 @@ async fn list_payments(
     )
     .bind(team_id)
     .bind(limit)
-    .fetch_all(&state.db)
+    .fetch_all(&*state.db)
     .await?;
 
     let has_more = payments.len() as i64 == limit;
@@ -55,7 +55,7 @@ async fn get_payment(
     )
     .bind(id)
     .bind(team_id)
-    .fetch_optional(&state.db)
+    .fetch_optional(&*state.db)
     .await?
     .ok_or_else(|| crate::errors::ApiError::NotFound("Payment".into()))?;
 
@@ -78,7 +78,7 @@ async fn refund_payment(
     )
     .bind(id)
     .bind(team_id)
-    .fetch_optional(&state.db)
+    .fetch_optional(&*state.db)
     .await?
     .ok_or_else(|| crate::errors::ApiError::NotFound("Payment".into()))?;
 
@@ -98,7 +98,7 @@ async fn refund_payment(
     .bind(team_id)
     .bind(refund_amount)
     .bind(&req.reason)
-    .fetch_one(&state.db)
+    .fetch_one(&*state.db)
     .await?;
 
     tracing::info!(payment_id = %id, amount = %refund_amount, "Payment refunded");

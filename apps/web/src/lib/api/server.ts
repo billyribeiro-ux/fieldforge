@@ -35,3 +35,57 @@ export async function serverFetch<T>(
 
 	return res.json();
 }
+
+export async function serverPost<T>(
+	path: string,
+	body: unknown,
+	options: { token?: string } = {}
+): Promise<{ data: T; meta: Record<string, unknown> | null }> {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json'
+	};
+
+	if (options.token) {
+		headers['Authorization'] = `Bearer ${options.token}`;
+	}
+
+	const res = await fetch(`${API_BASE}${path}`, {
+		method: 'POST',
+		headers,
+		body: JSON.stringify(body)
+	});
+
+	if (!res.ok) {
+		const text = await res.text().catch(() => '');
+		throw new Error(`API ${res.status}: ${text}`);
+	}
+
+	return res.json();
+}
+
+export async function serverPatch<T>(
+	path: string,
+	body: unknown,
+	options: { token?: string } = {}
+): Promise<{ data: T; meta: Record<string, unknown> | null }> {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json'
+	};
+
+	if (options.token) {
+		headers['Authorization'] = `Bearer ${options.token}`;
+	}
+
+	const res = await fetch(`${API_BASE}${path}`, {
+		method: 'PATCH',
+		headers,
+		body: JSON.stringify(body)
+	});
+
+	if (!res.ok) {
+		const text = await res.text().catch(() => '');
+		throw new Error(`API ${res.status}: ${text}`);
+	}
+
+	return res.json();
+}

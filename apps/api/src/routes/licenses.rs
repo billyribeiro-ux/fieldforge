@@ -36,8 +36,7 @@ async fn list_licenses(
     )
     .bind(team_id)
     .fetch_all(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": licenses, "meta": null, "errors": null })))
 }
@@ -62,8 +61,7 @@ async fn create_license(
     .bind(req.issued_date)
     .bind(req.expiry_date)
     .fetch_one(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": license, "meta": null, "errors": null })))
 }
@@ -80,9 +78,8 @@ async fn get_license(
     .bind(id)
     .bind(team_id)
     .fetch_optional(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?
-    .ok_or_else(|| ApiError::NotFound("License not found".into()))?;
+    .await?
+    .ok_or_else(|| ApiError::NotFound("License".into()))?;
 
     Ok(Json(json!({ "data": license, "meta": null, "errors": null })))
 }
@@ -97,8 +94,7 @@ async fn delete_license(
         .bind(id)
         .bind(team_id)
         .execute(&*state.db)
-        .await
-        .map_err(|e| ApiError::Internal(e.to_string()))?;
+        .await?;
 
     Ok(Json(json!({ "data": null, "meta": null, "errors": null })))
 }
@@ -113,8 +109,7 @@ async fn list_policies(
     )
     .bind(team_id)
     .fetch_all(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": policies, "meta": null, "errors": null })))
 }
@@ -141,8 +136,7 @@ async fn create_policy(
     .bind(req.auto_renew.unwrap_or(false))
     .bind(&req.notes)
     .fetch_one(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": policy, "meta": null, "errors": null })))
 }
@@ -159,9 +153,8 @@ async fn get_policy(
     .bind(id)
     .bind(team_id)
     .fetch_optional(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?
-    .ok_or_else(|| ApiError::NotFound("Insurance policy not found".into()))?;
+    .await?
+    .ok_or_else(|| ApiError::NotFound("Insurance policy".into()))?;
 
     Ok(Json(json!({ "data": policy, "meta": null, "errors": null })))
 }
@@ -176,8 +169,7 @@ async fn delete_policy(
         .bind(id)
         .bind(team_id)
         .execute(&*state.db)
-        .await
-        .map_err(|e| ApiError::Internal(e.to_string()))?;
+        .await?;
 
     Ok(Json(json!({ "data": null, "meta": null, "errors": null })))
 }

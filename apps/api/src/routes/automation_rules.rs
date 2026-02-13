@@ -30,8 +30,7 @@ async fn list_rules(
     )
     .bind(team_id)
     .fetch_all(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": rules, "meta": null, "errors": null })))
 }
@@ -54,8 +53,7 @@ async fn create_rule(
     .bind(&req.actions)
     .bind(req.delay_minutes.unwrap_or(0))
     .fetch_one(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": rule, "meta": null, "errors": null })))
 }
@@ -72,9 +70,8 @@ async fn get_rule(
     .bind(id)
     .bind(team_id)
     .fetch_optional(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?
-    .ok_or_else(|| ApiError::NotFound("Automation rule not found".into()))?;
+    .await?
+    .ok_or_else(|| ApiError::NotFound("Automation rule".into()))?;
 
     Ok(Json(json!({ "data": rule, "meta": null, "errors": null })))
 }
@@ -103,8 +100,7 @@ async fn update_rule(
     .bind(req.get("actions"))
     .bind(req.get("delay_minutes").and_then(|v| v.as_i64()).map(|v| v as i32))
     .fetch_one(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": rule, "meta": null, "errors": null })))
 }
@@ -119,8 +115,7 @@ async fn delete_rule(
         .bind(id)
         .bind(team_id)
         .execute(&*state.db)
-        .await
-        .map_err(|e| ApiError::Internal(e.to_string()))?;
+        .await?;
 
     Ok(Json(json!({ "data": null, "meta": null, "errors": null })))
 }
@@ -140,8 +135,7 @@ async fn toggle_rule(
     .bind(id)
     .bind(team_id)
     .fetch_one(&*state.db)
-    .await
-    .map_err(|e| ApiError::Internal(e.to_string()))?;
+    .await?;
 
     Ok(Json(json!({ "data": rule, "meta": null, "errors": null })))
 }
