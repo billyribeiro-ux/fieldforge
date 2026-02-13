@@ -6,6 +6,7 @@ export { default as Card } from './Card.svelte';
 export { default as CommandPalette } from './CommandPalette.svelte';
 export { default as ConfirmDialog } from './ConfirmDialog.svelte';
 export { default as DataTable } from './DataTable.svelte';
+export { default as Drawer } from './Drawer.svelte';
 export { default as Dropdown } from './Dropdown.svelte';
 export { default as EmptyState } from './EmptyState.svelte';
 export { default as ErrorBoundary } from './ErrorBoundary.svelte';
