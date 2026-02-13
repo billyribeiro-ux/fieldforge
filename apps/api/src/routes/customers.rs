@@ -20,11 +20,7 @@ pub fn router() -> Router<Arc<AppState>> {
             "/customers/{id}",
             get(get_customer).patch(update_customer).delete(delete_customer),
         )
-        .route_layer(axum::middleware::from_fn_with_state(
-            Arc::new(()),
-            |state, req, next| async { Ok::<_, std::convert::Infallible>(next.run(req).await) },
-        ))
-    // NOTE: In production, wrap with require_auth middleware
+    // TODO: In production, wrap with require_auth middleware layer
 }
 
 async fn create_customer(

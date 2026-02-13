@@ -54,7 +54,7 @@ aws-config = "1"
 reqwest = { version = "0.12", features = ["json", "multipart"] }
 
 # Stripe
-stripe-rust = "0.34"
+async-stripe = { version = "0.39", features = ["runtime-tokio-hyper"] }
 
 # Password & crypto
 rand = "0.8"

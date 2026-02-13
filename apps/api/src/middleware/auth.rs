@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use axum::body::Body;
 use axum::extract::State;
 use axum::http::Request;
 use axum::middleware::Next;
@@ -29,10 +30,10 @@ pub struct AuthUser {
     pub team_id: Option<Uuid>,
 }
 
-pub async fn require_auth<B>(
+pub async fn require_auth(
     State(state): State<Arc<AppState>>,
-    mut request: Request<B>,
-    next: Next<B>,
+    mut request: Request<Body>,
+    next: Next,
 ) -> Result<Response, ApiError> {
     let token = request
         .headers()
