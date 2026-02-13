@@ -1,5 +1,3 @@
-use crate::models::job::JobStatus;
-
 /// Valid state transitions for the job lifecycle FSM.
 /// Lead → Estimated → Approved → Scheduled → EnRoute → InProgress → Paused → Completed → Invoiced → Paid → Closed
 pub fn is_valid_transition(from: &str, to: &str) -> bool {

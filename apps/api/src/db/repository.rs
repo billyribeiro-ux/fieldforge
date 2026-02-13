@@ -138,7 +138,7 @@ pub async fn get_customer(pool: &PgPool, team_id: Uuid, id: Uuid) -> ApiResult<C
 }
 
 pub async fn update_customer(pool: &PgPool, team_id: Uuid, id: Uuid, req: &UpdateCustomerRequest) -> ApiResult<Customer> {
-    let existing = get_customer(pool, team_id, id).await?;
+    let _existing = get_customer(pool, team_id, id).await?;
 
     let customer = sqlx::query_as::<_, Customer>(
         r#"

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
-use axum::routing::{get, patch, post};
+use axum::routing::{get, patch};
 use axum::{Json, Router};
 use serde_json::json;
 use uuid::Uuid;
@@ -74,7 +74,7 @@ async fn get_job(
 async fn update_job(
     State(state): State<Arc<AppState>>,
     Path(id): Path<Uuid>,
-    Json(req): Json<UpdateJobRequest>,
+    Json(_req): Json<UpdateJobRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
     let team_id = Uuid::nil(); // placeholder
     let job = repository::get_job(&state.db, team_id, id).await?;
