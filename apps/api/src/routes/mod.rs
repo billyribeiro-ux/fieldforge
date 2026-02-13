@@ -15,6 +15,7 @@ pub mod time_entries;
 pub mod webhooks;
 pub mod checklists;
 pub mod equipment;
+pub mod notifications;
 pub mod vehicles;
 
 use std::sync::Arc;
@@ -41,4 +42,5 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(search::router())
         .merge(audit::router())
         .merge(webhooks::router())
+        .merge(notifications::router())
 }
