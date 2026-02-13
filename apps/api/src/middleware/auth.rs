@@ -62,6 +62,17 @@ pub async fn require_auth(
     Ok(next.run(request).await)
 }
 
+pub fn verify_token(token: &str, secret: &str) -> Result<Claims, ApiError> {
+    let token_data = decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(secret.as_bytes()),
+        &Validation::default(),
+    )
+    .map_err(|_| ApiError::Unauthorized)?;
+
+    Ok(token_data.claims)
+}
+
 pub fn create_token(
     user_id: Uuid,
     email: &str,

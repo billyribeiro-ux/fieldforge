@@ -17,6 +17,7 @@ pub fn router() -> Router<Arc<AppState>> {
     Router::new()
         .route("/auth/register", post(register))
         .route("/auth/login", post(login))
+        .route("/auth/me", axum::routing::get(me))
 }
 
 async fn register(
@@ -121,6 +122,46 @@ async fn login(
                 "role": format!("{:?}", user.role),
                 "team_id": user.team_id,
             }
+        },
+        "meta": null,
+        "errors": null,
+    })))
+}
+
+async fn me(
+    State(state): State<Arc<AppState>>,
+    headers: axum::http::HeaderMap,
+) -> ApiResult<Json<serde_json::Value>> {
+    let auth_header = headers
+        .get("authorization")
+        .and_then(|v| v.to_str().ok())
+        .ok_or(ApiError::Unauthorized)?;
+
+    let token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(ApiError::Unauthorized)?;
+
+    let claims = crate::middleware::auth::verify_token(token, &state.config.auth.jwt_secret)
+        .map_err(|_| ApiError::Unauthorized)?;
+
+    let user = sqlx::query_as::<_, crate::models::user::User>(
+        "SELECT * FROM users WHERE id = $1",
+    )
+    .bind(claims.sub)
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or(ApiError::Unauthorized)?;
+
+    Ok(Json(json!({
+        "data": {
+            "id": user.id,
+            "email": user.email,
+            "phone": user.phone,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "role": format!("{:?}", user.role),
+            "team_id": user.team_id,
+            "avatar_url": user.avatar_url,
         },
         "meta": null,
         "errors": null,
