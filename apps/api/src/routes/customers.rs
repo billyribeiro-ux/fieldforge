@@ -1,0 +1,109 @@
+use std::sync::Arc;
+
+use axum::extract::{Path, Query, State};
+use axum::routing::{delete, get, patch, post};
+use axum::{Extension, Json, Router};
+use serde_json::json;
+use uuid::Uuid;
+
+use crate::db::repository;
+use crate::errors::ApiResult;
+use crate::middleware::auth::{require_auth, AuthUser};
+use crate::models::common::PaginationParams;
+use crate::models::customer::{CreateCustomerRequest, UpdateCustomerRequest};
+use crate::AppState;
+
+pub fn router() -> Router<Arc<AppState>> {
+    Router::new()
+        .route("/customers", get(list_customers).post(create_customer))
+        .route(
+            "/customers/{id}",
+            get(get_customer).patch(update_customer).delete(delete_customer),
+        )
+        .route_layer(axum::middleware::from_fn_with_state(
+            Arc::new(()),
+            |state, req, next| async { Ok::<_, std::convert::Infallible>(next.run(req).await) },
+        ))
+    // NOTE: In production, wrap with require_auth middleware
+}
+
+async fn create_customer(
+    State(state): State<Arc<AppState>>,
+    // Extension(auth): Extension<AuthUser>,
+    Json(req): Json<CreateCustomerRequest>,
+) -> ApiResult<Json<serde_json::Value>> {
+    // TODO: get team_id from auth user
+    let team_id = Uuid::nil(); // placeholder
+    let customer = repository::create_customer(&state.db, team_id, &req).await?;
+
+    Ok(Json(json!({
+        "data": customer,
+        "meta": null,
+        "errors": null,
+    })))
+}
+
+async fn list_customers(
+    State(state): State<Arc<AppState>>,
+    Query(pagination): Query<PaginationParams>,
+    Query(params): Query<std::collections::HashMap<String, String>>,
+) -> ApiResult<Json<serde_json::Value>> {
+    let team_id = Uuid::nil(); // placeholder
+    let search = params.get("search").map(|s| s.as_str());
+    let cursor = pagination.cursor.as_ref().and_then(|c| c.parse::<Uuid>().ok());
+
+    let customers = repository::list_customers(&state.db, team_id, search, pagination.limit(), cursor).await?;
+    let has_more = customers.len() as i64 == pagination.limit();
+
+    Ok(Json(json!({
+        "data": customers,
+        "meta": {
+            "has_more": has_more,
+            "cursor": customers.last().map(|c| c.id.to_string()),
+        },
+        "errors": null,
+    })))
+}
+
+async fn get_customer(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> ApiResult<Json<serde_json::Value>> {
+    let team_id = Uuid::nil(); // placeholder
+    let customer = repository::get_customer(&state.db, team_id, id).await?;
+
+    Ok(Json(json!({
+        "data": customer,
+        "meta": null,
+        "errors": null,
+    })))
+}
+
+async fn update_customer(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+    Json(req): Json<UpdateCustomerRequest>,
+) -> ApiResult<Json<serde_json::Value>> {
+    let team_id = Uuid::nil(); // placeholder
+    let customer = repository::update_customer(&state.db, team_id, id, &req).await?;
+
+    Ok(Json(json!({
+        "data": customer,
+        "meta": null,
+        "errors": null,
+    })))
+}
+
+async fn delete_customer(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<Uuid>,
+) -> ApiResult<Json<serde_json::Value>> {
+    let team_id = Uuid::nil(); // placeholder
+    repository::delete_customer(&state.db, team_id, id).await?;
+
+    Ok(Json(json!({
+        "data": null,
+        "meta": { "message": "Customer deleted" },
+        "errors": null,
+    })))
+}

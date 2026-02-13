@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+target/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+.next/
+.svelte-kit/
+out/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Python
+*.egg-info/
+*.egg
+.eggs/
+*.whl
+
+# Logs
+*.log
+logs/
+
+# Testing
+coverage/
+.coverage
+htmlcov/
+
+# Docker
+docker-compose.override.yml
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# Mobile
+*.ipa
+*.apk
+*.aab
+*.dSYM.zip
+*.dSYM
+DerivedData/
+Pods/
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.hmap
+*.ipa
+*.xcuserstate
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+local.properties
+.gradle/
+captures/
+.externalNativeBuild/
+.cxx/
