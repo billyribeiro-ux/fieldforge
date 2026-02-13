@@ -84,8 +84,8 @@ fieldforge/
 - **Estimate view** — approve/decline with optional reason
 - **Invoice view** — online payment (card, ACH, Apple Pay, Google Pay)
 
-### UI Components (21)
-Avatar, Badge, Breadcrumb, Button, Card, CommandPalette (⌘K), Dropdown, EmptyState, ErrorBoundary, Input, Modal, Pagination, Progress, Select, Skeleton, StatusBadge, Switch, Tabs, Textarea, Toast, Tooltip
+### UI Components (24)
+Avatar, Badge, Breadcrumb, Button, Card, CommandPalette (⌘K), ConfirmDialog, DataTable, Dropdown, EmptyState, ErrorBoundary, FileUpload, Input, Modal, Pagination, Progress, Select, Skeleton, StatusBadge, Switch, Tabs, Textarea, Toast, Tooltip
 
 ### Middleware (4)
 Auth (JWT), CORS, Request ID, Rate Limiting (100 req/60s per IP)
@@ -93,7 +93,18 @@ Auth (JWT), CORS, Request ID, Rate Limiting (100 req/60s per IP)
 ### Server-Side Features
 - `hooks.server.ts` — auth token extraction from cookies, user profile fetch
 - `+layout.server.ts` — dashboard auth guard, user data propagation
-- `+page.server.ts` — SSR load functions for jobs, customers, estimates, invoices, dashboard (parallel fetch with `Promise.allSettled`)
+- `+page.server.ts` — SSR load functions for ALL dashboard pages (parallel fetch with `Promise.allSettled`)
+- **Form Actions** — server-side mutations for jobs, customers, estimates, invoices (create, update, delete, status transitions, notes, properties, payments)
+- **Server API Client** — `serverFetch`, `serverPost`, `serverPatch`, `serverDelete` helpers
+
+### Reactive Stores (Svelte 5)
+- `auth.svelte.ts` — JWT token, user state
+- `toast.svelte.ts` — toast notification system
+- `notifications.svelte.ts` — fetch, mark read, polling (30s)
+- `loading.svelte.ts` — ref-counted loading state
+
+### Utilities
+`format.ts` (currency, date, phone, address), `validate.ts`, `debounce.ts`, `storage.ts`, `theme.ts`, `cn.ts`
 
 ## Getting Started
 
@@ -178,9 +189,13 @@ cd apps/web && pnpm build
 - [x] **Phase 24** — Payments route wired (24 API modules), fixes
 - [x] **Phase 25** — NotificationStore, LoadingStore (Svelte 5 reactive classes), polling
 - [x] **Phase 26** — Web .env.example, README final update
-- [ ] **Phase 27** — Mobile apps (iOS + Android)
-- [ ] **Phase 28** — AI/ML features (photo estimation, smart scheduling)
-- [ ] **Phase 29** — Production deployment, performance tuning, security audit
+- [x] **Phase 27** — SvelteKit form actions, serverPost/serverPatch helpers
+- [x] **Phase 28** — Form actions for estimates (line items), job status transitions, notes
+- [x] **Phase 29** — Comprehensive form actions: customer update/property/note, estimate send/approve/decline/convert, invoice send/void/payment
+- [x] **Phase 30** — serverDelete helper, invoice creation form action, complete server API client
+- [ ] **Phase 31** — Mobile apps (iOS + Android)
+- [ ] **Phase 32** — AI/ML features (photo estimation, smart scheduling)
+- [ ] **Phase 33** — Production deployment, performance tuning, security audit
 
 ## License
 
