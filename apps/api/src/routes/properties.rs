@@ -1,13 +1,12 @@
 use std::sync::Arc;
 
-use axum::extract::{Path, Query, State};
+use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
-use crate::models::common::PaginationParams;
 use crate::models::property::CreatePropertyRequest;
 use crate::AppState;
 

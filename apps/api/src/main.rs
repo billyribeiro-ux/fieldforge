@@ -60,6 +60,7 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .nest("/api/v1", routes::api_router(state.clone()))
+        .layer(axum::middleware::from_fn(middleware::request_id::request_id_middleware))
         .layer(TraceLayer::new_for_http())
         .layer(middleware::cors::cors_layer(&settings))
         .with_state(state);
