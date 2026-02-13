@@ -19,4 +19,6 @@ pub mod review;
 pub mod service_plan;
 pub mod vehicle;
 pub mod tag;
+pub mod automation_rule;
+pub mod license;
 pub mod common;

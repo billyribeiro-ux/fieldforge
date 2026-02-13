@@ -35,7 +35,7 @@ async fn list_licenses(
         "SELECT * FROM licenses WHERE team_id = $1 ORDER BY expiry_date ASC",
     )
     .bind(team_id)
-    .fetch_all(&*state.db)
+    .fetch_all(&state.db)
     .await?;
 
     Ok(Json(json!({ "data": licenses, "meta": null, "errors": null })))
@@ -60,7 +60,7 @@ async fn create_license(
     .bind(&req.issuing_authority)
     .bind(req.issued_date)
     .bind(req.expiry_date)
-    .fetch_one(&*state.db)
+    .fetch_one(&state.db)
     .await?;
 
     Ok(Json(json!({ "data": license, "meta": null, "errors": null })))
@@ -77,7 +77,7 @@ async fn get_license(
     )
     .bind(id)
     .bind(team_id)
-    .fetch_optional(&*state.db)
+    .fetch_optional(&state.db)
     .await?
     .ok_or_else(|| ApiError::NotFound("License".into()))?;
 
@@ -93,7 +93,7 @@ async fn delete_license(
     sqlx::query("DELETE FROM licenses WHERE id = $1 AND team_id = $2")
         .bind(id)
         .bind(team_id)
-        .execute(&*state.db)
+        .execute(&state.db)
         .await?;
 
     Ok(Json(json!({ "data": null, "meta": null, "errors": null })))
@@ -108,7 +108,7 @@ async fn list_policies(
         "SELECT * FROM insurance_policies WHERE team_id = $1 ORDER BY expiry_date ASC",
     )
     .bind(team_id)
-    .fetch_all(&*state.db)
+    .fetch_all(&state.db)
     .await?;
 
     Ok(Json(json!({ "data": policies, "meta": null, "errors": null })))
@@ -135,7 +135,7 @@ async fn create_policy(
     .bind(req.expiry_date)
     .bind(req.auto_renew.unwrap_or(false))
     .bind(&req.notes)
-    .fetch_one(&*state.db)
+    .fetch_one(&state.db)
     .await?;
 
     Ok(Json(json!({ "data": policy, "meta": null, "errors": null })))
@@ -152,7 +152,7 @@ async fn get_policy(
     )
     .bind(id)
     .bind(team_id)
-    .fetch_optional(&*state.db)
+    .fetch_optional(&state.db)
     .await?
     .ok_or_else(|| ApiError::NotFound("Insurance policy".into()))?;
 
@@ -168,7 +168,7 @@ async fn delete_policy(
     sqlx::query("DELETE FROM insurance_policies WHERE id = $1 AND team_id = $2")
         .bind(id)
         .bind(team_id)
-        .execute(&*state.db)
+        .execute(&state.db)
         .await?;
 
     Ok(Json(json!({ "data": null, "meta": null, "errors": null })))
