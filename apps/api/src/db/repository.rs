@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
 use crate::models::customer::{CreateCustomerRequest, Customer, CustomerListItem, UpdateCustomerRequest};
-use crate::models::job::{CreateJobRequest, Job, JobFilters, JobListItem, UpdateJobRequest};
+use crate::models::job::{CreateJobRequest, Job, JobFilters, JobListItem};
 use crate::models::user::{CreateUserRequest, User, UserResponse};
 
 // ── Users ──

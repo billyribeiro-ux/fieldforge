@@ -1,9 +1,10 @@
+#![allow(dead_code)]
+
 use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::Router;
 use sqlx::postgres::PgPoolOptions;
-use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 

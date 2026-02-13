@@ -60,6 +60,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Dispatch — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Dispatch Board">
 	{#snippet actions()}
 		<div class="flex items-center gap-2">

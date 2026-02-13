@@ -112,6 +112,10 @@
 	let sending = $state(false);
 </script>
 
+<svelte:head>
+	<title>New Estimate — FieldForge</title>
+</svelte:head>
+
 <TopBar>
 	{#snippet actions()}
 		<div class="flex items-center gap-2">

@@ -84,6 +84,10 @@
 	let inviteName = $state('');
 </script>
 
+<svelte:head>
+	<title>Team — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Team">
 	{#snippet actions()}
 		<Button variant="primary" size="md" onclick={() => (showInviteModal = true)}>

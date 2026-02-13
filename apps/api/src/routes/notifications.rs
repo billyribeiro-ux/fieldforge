@@ -7,7 +7,7 @@ use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::errors::{ApiError, ApiResult};
+use crate::errors::ApiResult;
 use crate::models::common::PaginationParams;
 use crate::AppState;
 

@@ -75,6 +75,10 @@
 	let newNotes = $state('');
 </script>
 
+<svelte:head>
+	<title>Expenses — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Expenses">
 	{#snippet actions()}
 		<Button variant="primary" size="md" onclick={() => (showAddModal = true)}>

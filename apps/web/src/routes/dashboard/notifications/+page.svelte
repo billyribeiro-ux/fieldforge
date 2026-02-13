@@ -60,6 +60,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Notifications — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Notifications">
 	{#snippet actions()}
 		<div class="flex items-center gap-2">

@@ -43,6 +43,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Compliance — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Compliance">
 	{#snippet actions()}
 		<Button size="sm">

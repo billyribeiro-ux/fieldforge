@@ -1,31 +1,27 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import TopBar from '$lib/components/layout/TopBar.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
-	import { ArrowLeft, Save, Send, MapPin, Clock, User, Calendar } from 'lucide-svelte';
+	import { ArrowLeft, Send, MapPin, Clock, User, Calendar, Loader2 } from 'lucide-svelte';
+
+	let { form } = $props();
+
+	let submitting = $state(false);
 
 	let customerId = $state('');
-	let propertyId = $state('');
 	let title = $state('');
 	let description = $state('');
 	let jobType = $state('');
 	let priority = $state('normal');
-	let status = $state('lead');
 	let assignedTo = $state('');
 	let scheduledStart = $state('');
-	let scheduledEnd = $state('');
 	let estimatedDuration = $state('60');
-
-	const customerOptions = [
-		{ value: '1', label: 'Sarah Johnson' },
-		{ value: '2', label: 'Mike Chen — Chen Properties LLC' },
-		{ value: '3', label: 'Lisa Rodriguez' },
-		{ value: '4', label: 'Tom Williams' },
-		{ value: '5', label: 'Amy Foster — Foster Realty' },
-	];
+	let source = $state('');
+	let poNumber = $state('');
 
 	const jobTypeOptions = [
 		{ value: 'hvac_repair', label: 'HVAC Repair' },
@@ -41,16 +37,10 @@
 	];
 
 	const priorityOptions = [
-		{ value: 'emergency', label: '🔴 Emergency' },
-		{ value: 'high', label: '🟠 High' },
-		{ value: 'normal', label: '🟢 Normal' },
-		{ value: 'low', label: '⚪ Low' },
-	];
-
-	const statusOptions = [
-		{ value: 'lead', label: 'Lead' },
-		{ value: 'estimated', label: 'Estimated' },
-		{ value: 'scheduled', label: 'Scheduled' },
+		{ value: 'emergency', label: 'Emergency' },
+		{ value: 'high', label: 'High' },
+		{ value: 'normal', label: 'Normal' },
+		{ value: 'low', label: 'Low' },
 	];
 
 	const technicianOptions = [
@@ -62,121 +52,127 @@
 	];
 </script>
 
+<svelte:head>
+	<title>New Job — FieldForge</title>
+</svelte:head>
+
 <TopBar title="New Job">
 	{#snippet actions()}
-		<div class="flex items-center gap-2">
-			<Button variant="outline" size="sm" href="/dashboard/jobs">
-				<ArrowLeft class="w-4 h-4" />
-				Cancel
-			</Button>
-			<Button variant="outline" size="sm">
-				<Save class="w-4 h-4" />
-				Save Draft
-			</Button>
-			<Button size="sm">
-				<Send class="w-4 h-4" />
-				Create Job
-			</Button>
-		</div>
+		<Button variant="outline" size="sm" href="/dashboard/jobs">
+			<ArrowLeft class="w-4 h-4" />
+			Cancel
+		</Button>
 	{/snippet}
 </TopBar>
 
-<div class="p-6 max-w-4xl mx-auto space-y-6">
-	<!-- Customer & Property -->
-	<Card>
-		<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
-			<User class="w-4 h-4 text-surface-400" />
-			Customer & Location
-		</h3>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<Select
-				label="Customer"
-				options={customerOptions}
-				bind:value={customerId}
-				placeholder="Select a customer..."
-			/>
-			<Select
-				label="Property"
-				options={[{ value: '', label: 'Default property' }]}
-				bind:value={propertyId}
-				placeholder="Select property..."
-			/>
-		</div>
-	</Card>
+<form method="POST" action="?/create" use:enhance={() => {
+	submitting = true;
+	return async ({ update }) => {
+		submitting = false;
+		await update();
+	};
+}}>
+	<div class="p-6 max-w-4xl mx-auto space-y-6">
+		{#if form?.error}
+			<div class="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-3 rounded-xl text-sm">
+				{form.error}
+			</div>
+		{/if}
 
-	<!-- Job Details -->
-	<Card>
-		<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
-			<MapPin class="w-4 h-4 text-surface-400" />
-			Job Details
-		</h3>
-		<div class="space-y-4">
-			<Input label="Job Title" bind:value={title} placeholder="e.g., AC Unit Not Cooling — Emergency Repair" />
-
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<!-- Customer & Property -->
+		<Card>
+			<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
+				<User class="w-4 h-4 text-surface-400" />
+				Customer & Location
+			</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<Select
-					label="Job Type"
-					options={jobTypeOptions}
-					bind:value={jobType}
-					placeholder="Select type..."
-				/>
-				<Select
-					label="Priority"
-					options={priorityOptions}
-					bind:value={priority}
-				/>
-				<Select
-					label="Initial Status"
-					options={statusOptions}
-					bind:value={status}
+					label="Customer"
+					name="customer_id"
+					options={[{ value: '', label: 'Select a customer...' }, { value: '1', label: 'Sarah Johnson' }, { value: '2', label: 'Mike Chen — Chen Properties LLC' }, { value: '3', label: 'Lisa Rodriguez' }]}
+					bind:value={customerId}
 				/>
 			</div>
+		</Card>
 
-			<Textarea
-				label="Description"
-				bind:value={description}
-				placeholder="Describe the job scope, customer concerns, and any relevant details..."
-				rows={4}
-			/>
-		</div>
-	</Card>
+		<!-- Job Details -->
+		<Card>
+			<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
+				<MapPin class="w-4 h-4 text-surface-400" />
+				Job Details
+			</h3>
+			<div class="space-y-4">
+				<Input label="Job Title" name="title" bind:value={title} placeholder="e.g., AC Unit Not Cooling — Emergency Repair" required />
 
-	<!-- Scheduling -->
-	<Card>
-		<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
-			<Calendar class="w-4 h-4 text-surface-400" />
-			Scheduling
-		</h3>
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-			<Select
-				label="Assign To"
-				options={technicianOptions}
-				bind:value={assignedTo}
-			/>
-			<Input label="Scheduled Start" type="datetime-local" bind:value={scheduledStart} />
-			<Input label="Scheduled End" type="datetime-local" bind:value={scheduledEnd} />
-		</div>
-		<div class="mt-4">
-			<Input label="Estimated Duration (minutes)" type="number" bind:value={estimatedDuration} />
-		</div>
-	</Card>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<Select
+						label="Job Type"
+						name="job_type"
+						options={[{ value: '', label: 'Select type...' }, ...jobTypeOptions]}
+						bind:value={jobType}
+					/>
+					<Select
+						label="Priority"
+						name="priority"
+						options={priorityOptions}
+						bind:value={priority}
+					/>
+				</div>
 
-	<!-- Tags (placeholder) -->
-	<Card>
-		<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
-			<Clock class="w-4 h-4 text-surface-400" />
-			Additional Options
-		</h3>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<Input label="Source / Referral" placeholder="e.g., Google, Referral, Repeat customer" />
-			<Input label="Purchase Order #" placeholder="Customer PO number (optional)" />
-		</div>
-	</Card>
+				<Textarea
+					label="Description"
+					name="description"
+					bind:value={description}
+					placeholder="Describe the job scope, customer concerns, and any relevant details..."
+					rows={4}
+				/>
+			</div>
+		</Card>
 
-	<!-- Actions -->
-	<div class="flex justify-end gap-3 pb-8">
-		<Button variant="outline" href="/dashboard/jobs">Cancel</Button>
-		<Button variant="outline">Save as Draft</Button>
-		<Button>Create Job</Button>
+		<!-- Scheduling -->
+		<Card>
+			<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
+				<Calendar class="w-4 h-4 text-surface-400" />
+				Scheduling
+			</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<Select
+					label="Assign To"
+					name="assigned_to"
+					options={technicianOptions}
+					bind:value={assignedTo}
+				/>
+				<Input label="Scheduled Start" name="scheduled_start" type="datetime-local" bind:value={scheduledStart} />
+			</div>
+			<div class="mt-4">
+				<Input label="Estimated Duration (minutes)" name="estimated_duration" type="number" bind:value={estimatedDuration} />
+			</div>
+		</Card>
+
+		<!-- Additional Options -->
+		<Card>
+			<h3 class="text-sm font-semibold text-surface-900 mb-4 flex items-center gap-2">
+				<Clock class="w-4 h-4 text-surface-400" />
+				Additional Options
+			</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<Input label="Source / Referral" name="source" bind:value={source} placeholder="e.g., Google, Referral, Repeat customer" />
+				<Input label="Purchase Order #" name="po_number" bind:value={poNumber} placeholder="Customer PO number (optional)" />
+			</div>
+		</Card>
+
+		<!-- Actions -->
+		<div class="flex justify-end gap-3 pb-8">
+			<Button variant="outline" href="/dashboard/jobs">Cancel</Button>
+			<Button type="submit" disabled={submitting}>
+				{#if submitting}
+					<Loader2 class="w-4 h-4 animate-spin" />
+					Creating...
+				{:else}
+					<Send class="w-4 h-4" />
+					Create Job
+				{/if}
+			</Button>
+		</div>
 	</div>
-</div>
+</form>

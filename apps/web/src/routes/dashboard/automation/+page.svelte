@@ -61,6 +61,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Automation — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Automation">
 	{#snippet actions()}
 		<Button size="sm">

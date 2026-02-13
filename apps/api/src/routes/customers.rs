@@ -1,14 +1,13 @@
 use std::sync::Arc;
 
 use axum::extract::{Path, Query, State};
-use axum::routing::{delete, get, patch, post};
-use axum::{Extension, Json, Router};
+use axum::routing::get;
+use axum::{Json, Router};
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::db::repository;
 use crate::errors::ApiResult;
-use crate::middleware::auth::{require_auth, AuthUser};
 use crate::models::common::PaginationParams;
 use crate::models::customer::{CreateCustomerRequest, UpdateCustomerRequest};
 use crate::AppState;

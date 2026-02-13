@@ -69,6 +69,10 @@
 	let processingFees = $derived(Math.round(cardTotal * 0.029 + payments.filter((p) => p.method === 'card' && p.status === 'completed').length * 0.30));
 </script>
 
+<svelte:head>
+	<title>Payments — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Payments">
 	{#snippet actions()}
 		<Button variant="outline" size="md">

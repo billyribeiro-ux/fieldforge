@@ -65,6 +65,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Invoice — FieldForge</title>
+</svelte:head>
+
 <div class="min-h-screen bg-surface-50">
 	<!-- Header -->
 	<header class="bg-white border-b border-surface-200">

@@ -5,7 +5,6 @@ use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
-use tokio::sync::broadcast;
 
 use crate::AppState;
 

@@ -80,6 +80,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Marketing — FieldForge</title>
+</svelte:head>
+
 <TopBar title="Marketing & Reviews">
 	{#snippet actions()}
 		<Button variant="primary" size="md">

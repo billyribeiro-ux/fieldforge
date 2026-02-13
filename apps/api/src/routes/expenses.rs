@@ -28,7 +28,7 @@ struct ExpenseFilters {
 
 async fn list_expenses(
     State(state): State<Arc<AppState>>,
-    Query(filters): Query<ExpenseFilters>,
+    Query(_filters): Query<ExpenseFilters>,
 ) -> ApiResult<Json<serde_json::Value>> {
     let team_id = Uuid::nil();
 

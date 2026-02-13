@@ -85,6 +85,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>New Invoice — FieldForge</title>
+</svelte:head>
+
 <TopBar>
 	{#snippet actions()}
 		<div class="flex items-center gap-2">

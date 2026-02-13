@@ -1,9 +1,8 @@
 use std::sync::Arc;
 
-use axum::extract::{Path, Query, State};
+use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
-use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 

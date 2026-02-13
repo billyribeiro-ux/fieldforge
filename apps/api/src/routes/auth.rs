@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::db::repository;
 use crate::errors::{ApiError, ApiResult};
 use crate::middleware::auth::create_token;
-use crate::models::user::{AuthResponse, CreateUserRequest, LoginRequest, UserResponse};
+use crate::models::user::{CreateUserRequest, LoginRequest};
 use crate::services::auth_service;
 use crate::AppState;
 
