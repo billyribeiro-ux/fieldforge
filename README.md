@@ -193,9 +193,14 @@ cd apps/web && pnpm build
 - [x] **Phase 28** — Form actions for estimates (line items), job status transitions, notes
 - [x] **Phase 29** — Comprehensive form actions: customer update/property/note, estimate send/approve/decline/convert, invoice send/void/payment
 - [x] **Phase 30** — serverDelete helper, invoice creation form action, complete server API client
-- [ ] **Phase 31** — Mobile apps (iOS + Android)
-- [ ] **Phase 32** — AI/ML features (photo estimation, smart scheduling)
-- [ ] **Phase 33** — Production deployment, performance tuning, security audit
+- [x] **Phase 31** — README final architecture update (24 components, stores, utilities)
+- [x] **Phase 32** — robots.txt SEO, OpenAPI 3.1 spec, `<svelte:head>` page titles
+- [x] **Phase 33** — (merged into Phase 32)
+- [x] **Phase 34** — TypeScript types for form actions and page data (~849 lines)
+- [x] **Phase 35** — Keyboard shortcut utility, README status update
+- [ ] **Phase 36** — Mobile apps (iOS + Android)
+- [ ] **Phase 37** — AI/ML features (photo estimation, smart scheduling)
+- [ ] **Phase 38** — Production deployment, performance tuning, security audit
 
 ## License
 
