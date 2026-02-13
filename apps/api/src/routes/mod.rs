@@ -1,3 +1,4 @@
+pub mod audit;
 pub mod auth;
 pub mod customers;
 pub mod estimates;
@@ -8,10 +9,13 @@ pub mod jobs;
 pub mod notes;
 pub mod photos;
 pub mod properties;
-pub mod inventory;
-pub mod vehicles;
+pub mod search;
 pub mod teams;
 pub mod time_entries;
+pub mod webhooks;
+pub mod checklists;
+pub mod equipment;
+pub mod vehicles;
 
 use std::sync::Arc;
 use axum::Router;
@@ -31,6 +35,10 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(notes::router())
         .merge(inventory::router())
         .merge(vehicles::router())
+        .merge(checklists::router())
+        .merge(equipment::router())
         .merge(teams::router())
-        .merge(inventory::router())
+        .merge(search::router())
+        .merge(audit::router())
+        .merge(webhooks::router())
 }

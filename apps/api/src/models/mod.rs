@@ -11,6 +11,7 @@ pub mod time_entry;
 pub mod photo;
 pub mod note;
 pub mod checklist;
+pub mod equipment;
 pub mod inventory;
 pub mod vehicle;
 pub mod tag;
