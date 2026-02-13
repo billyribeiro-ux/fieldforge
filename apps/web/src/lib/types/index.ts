@@ -792,3 +792,57 @@ export interface SearchResults {
 	invoices?: Invoice[];
 }
 
+// ── Form Action Responses ──
+
+export interface ActionSuccess {
+	success: true;
+}
+
+export interface ActionError {
+	error: string;
+}
+
+export interface ActionRedirect {
+	success: true;
+	id: string;
+}
+
+export type ActionResult = ActionSuccess | ActionError;
+
+// ── Page Data Types ──
+
+export interface JobsPageData {
+	jobs: Job[];
+	meta: Record<string, unknown>;
+	filters: { status: string; search: string };
+	error?: string;
+}
+
+export interface CustomersPageData {
+	customers: Customer[];
+	meta: Record<string, unknown>;
+	filters: { search: string };
+	error?: string;
+}
+
+export interface EstimatesPageData {
+	estimates: Estimate[];
+	meta: Record<string, unknown>;
+	error?: string;
+}
+
+export interface InvoicesPageData {
+	invoices: Invoice[];
+	meta: Record<string, unknown>;
+	error?: string;
+}
+
+export interface DashboardPageData {
+	stats: {
+		jobs: unknown[];
+		invoices: unknown[];
+		customers: unknown[];
+	};
+	error?: string;
+}
+
