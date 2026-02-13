@@ -518,6 +518,134 @@ export interface Vehicle {
 	updated_at: string;
 }
 
+// ── Expense ──
+
+export interface Expense {
+	id: string;
+	team_id: string;
+	user_id: string | null;
+	job_id: string | null;
+	vehicle_id: string | null;
+	category: string;
+	description: string;
+	amount: number;
+	tax_amount: number | null;
+	vendor: string | null;
+	receipt_url: string | null;
+	expense_date: string;
+	is_billable: boolean;
+	is_reimbursable: boolean;
+	reimbursed: boolean;
+	notes: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CreateExpenseRequest {
+	category: string;
+	description: string;
+	amount: number;
+	tax_amount?: number;
+	vendor?: string;
+	expense_date: string;
+	job_id?: string;
+	vehicle_id?: string;
+	is_billable?: boolean;
+	is_reimbursable?: boolean;
+	notes?: string;
+}
+
+// ── Service Plan ──
+
+export interface ServicePlan {
+	id: string;
+	team_id: string;
+	name: string;
+	description: string | null;
+	price_monthly: number | null;
+	price_quarterly: number | null;
+	price_annual: number | null;
+	visits_per_year: number;
+	discount_pct: number | null;
+	priority_scheduling: boolean;
+	is_active: boolean;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CustomerServicePlan {
+	id: string;
+	service_plan_id: string;
+	customer_id: string;
+	team_id: string;
+	billing_frequency: string;
+	start_date: string;
+	end_date: string | null;
+	auto_renew: boolean;
+	status: string;
+	visits_used: number;
+	created_at: string;
+	updated_at: string;
+}
+
+// ── Message ──
+
+export type MessageDirection = 'inbound' | 'outbound';
+export type MessageChannel = 'sms' | 'email' | 'phone' | 'in_app';
+export type MessageStatus = 'queued' | 'sent' | 'delivered' | 'failed' | 'received';
+
+export interface Message {
+	id: string;
+	team_id: string;
+	customer_id: string;
+	job_id: string | null;
+	user_id: string | null;
+	direction: MessageDirection;
+	channel: MessageChannel;
+	status: MessageStatus;
+	subject: string | null;
+	body: string;
+	sent_at: string | null;
+	delivered_at: string | null;
+	read_at: string | null;
+	created_at: string;
+}
+
+export interface SendMessageRequest {
+	customer_id: string;
+	channel: MessageChannel;
+	body: string;
+	subject?: string;
+	job_id?: string;
+}
+
+// ── Review ──
+
+export interface Review {
+	id: string;
+	team_id: string;
+	customer_id: string | null;
+	job_id: string | null;
+	platform: string;
+	rating: number;
+	content: string | null;
+	reviewer_name: string | null;
+	review_url: string | null;
+	response: string | null;
+	responded_at: string | null;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface CreateReviewRequest {
+	platform: string;
+	rating: number;
+	content?: string;
+	reviewer_name?: string;
+	customer_id?: string;
+	job_id?: string;
+}
+
 // ── Notification ──
 
 export type NotificationType = 'job_assigned' | 'job_status_changed' | 'estimate_approved' | 'estimate_declined'
@@ -577,20 +705,3 @@ export interface SearchResults {
 	invoices?: Invoice[];
 }
 
-// ── API Response Types ──
-
-export interface ApiResponse<T> {
-	data: T;
-	meta: Record<string, unknown> | null;
-	errors: Array<{ code: string; message: string }> | null;
-}
-
-export interface PaginatedResponse<T> {
-	data: T[];
-	meta: {
-		has_more: boolean;
-		cursor?: string;
-		total?: number;
-	};
-	errors: null;
-}
