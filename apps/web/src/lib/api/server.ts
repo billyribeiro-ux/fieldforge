@@ -63,6 +63,29 @@ export async function serverPost<T>(
 	return res.json();
 }
 
+export async function serverDelete(
+	path: string,
+	options: { token?: string } = {}
+): Promise<void> {
+	const headers: Record<string, string> = {
+		'Content-Type': 'application/json'
+	};
+
+	if (options.token) {
+		headers['Authorization'] = `Bearer ${options.token}`;
+	}
+
+	const res = await fetch(`${API_BASE}${path}`, {
+		method: 'DELETE',
+		headers
+	});
+
+	if (!res.ok) {
+		const text = await res.text().catch(() => '');
+		throw new Error(`API ${res.status}: ${text}`);
+	}
+}
+
 export async function serverPatch<T>(
 	path: string,
 	body: unknown,
