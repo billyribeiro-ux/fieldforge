@@ -21,7 +21,8 @@
 	let searchQuery = $state('');
 	let viewMode = $state<'table' | 'grid'>('table');
 
-	const customers = [
+	// Demo fallback data — used when API is not available
+	const demoCustomers = [
 		{ id: '1', first_name: 'Sarah', last_name: 'Johnson', email: 'sarah@email.com', phone: '(512) 555-0101', company: '', lifetime_value: 12450, outstanding: 4200, total_jobs: 8, tags: ['VIP', 'HVAC'], last_service: '2024-12-10' },
 		{ id: '2', first_name: 'Mike', last_name: 'Chen', email: 'mike.chen@email.com', phone: '(512) 555-0102', company: 'Chen Properties LLC', lifetime_value: 34200, outstanding: 0, total_jobs: 15, tags: ['Commercial', 'Property Manager'], last_service: '2024-12-12' },
 		{ id: '3', first_name: 'Lisa', last_name: 'Rodriguez', email: 'lisa.r@email.com', phone: '(512) 555-0103', company: '', lifetime_value: 2800, outstanding: 800, total_jobs: 3, tags: ['Residential'], last_service: '2024-12-14' },
@@ -31,6 +32,22 @@
 		{ id: '7', first_name: 'Karen', last_name: 'White', email: 'karen.w@email.com', phone: '(512) 555-0107', company: 'White & Sons Construction', lifetime_value: 67800, outstanding: 18500, total_jobs: 28, tags: ['VIP', 'Commercial', 'Subcontractor'], last_service: '2024-12-15' },
 		{ id: '8', first_name: 'Robert', last_name: 'Kim', email: 'robert.kim@email.com', phone: '(512) 555-0108', company: '', lifetime_value: 19200, outstanding: 0, total_jobs: 4, tags: ['Residential', 'Remodel'], last_service: '2024-12-10' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverCustomers = (data?.customers ?? []) as any[];
+	const customers = serverCustomers.length > 0 ? serverCustomers.map((c: any) => ({
+		id: c.id,
+		first_name: c.first_name ?? '',
+		last_name: c.last_name ?? '',
+		email: c.email ?? '',
+		phone: c.phone ?? '',
+		company: c.company_name ?? '',
+		lifetime_value: Number(c.lifetime_value ?? 0),
+		outstanding: Number(c.outstanding_balance ?? 0),
+		total_jobs: 0,
+		tags: c.tags ?? [],
+		last_service: c.created_at?.split('T')[0] ?? ''
+	})) : demoCustomers;
 
 	let filteredCustomers = $derived(
 		customers.filter((c) => {

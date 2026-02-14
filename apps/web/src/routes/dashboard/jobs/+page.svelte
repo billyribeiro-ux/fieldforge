@@ -60,8 +60,8 @@
 		}
 	}
 
-	// Demo data
-	const jobs = [
+	// Demo fallback data — used when API is not available
+	const demoJobs = [
 		{ id: '1', title: 'AC Unit Replacement', customer: 'Sarah Johnson', status: 'in_progress', priority: 'high', scheduled_date: '2024-12-15', scheduled_time: '9:00 AM', assigned: 'Mike T.', amount: '$4,200', address: '123 Oak St, Austin TX', tags: ['HVAC', 'Residential'] },
 		{ id: '2', title: 'Plumbing Inspection', customer: 'Mike Chen', status: 'scheduled', priority: 'normal', scheduled_date: '2024-12-15', scheduled_time: '1:00 PM', assigned: 'Jake R.', amount: '$350', address: '456 Elm Ave, Austin TX', tags: ['Plumbing'] },
 		{ id: '3', title: 'Emergency Leak Repair', customer: 'Lisa Rodriguez', status: 'en_route', priority: 'emergency', scheduled_date: '2024-12-15', scheduled_time: '11:30 AM', assigned: 'Mike T.', amount: '$800', address: '789 Pine Dr, Austin TX', tags: ['Plumbing', 'Emergency'] },
@@ -71,6 +71,22 @@
 		{ id: '7', title: 'Roof Leak Assessment', customer: 'Karen White', status: 'lead', priority: 'high', scheduled_date: '', scheduled_time: '', assigned: 'Unassigned', amount: '', address: '147 Walnut Way, Austin TX', tags: ['Roofing'] },
 		{ id: '8', title: 'Kitchen Remodel — Phase 2', customer: 'Robert Kim', status: 'invoiced', priority: 'normal', scheduled_date: '2024-12-10', scheduled_time: '7:00 AM', assigned: 'Full Crew', amount: '$18,500', address: '258 Spruce St, Austin TX', tags: ['General', 'Remodel'] }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverJobs = (data?.jobs ?? []) as any[];
+	const jobs = serverJobs.length > 0 ? serverJobs.map((j: any) => ({
+		id: j.id,
+		title: j.title,
+		customer: `${j.customer_first_name ?? ''} ${j.customer_last_name ?? ''}`.trim() || 'Unknown',
+		status: j.status ?? 'lead',
+		priority: j.priority ?? 'normal',
+		scheduled_date: j.scheduled_date ?? '',
+		scheduled_time: j.scheduled_start_time ?? '',
+		assigned: j.assigned_to ? 'Assigned' : 'Unassigned',
+		amount: j.total_amount ? `$${Number(j.total_amount).toLocaleString()}` : '',
+		address: '',
+		tags: j.tags ?? []
+	})) : demoJobs;
 
 	let filteredJobs = $derived(
 		jobs.filter((j) => {

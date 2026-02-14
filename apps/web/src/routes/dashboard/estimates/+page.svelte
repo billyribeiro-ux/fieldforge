@@ -10,7 +10,8 @@
 	let searchQuery = $state('');
 	let statusFilter = $state('all');
 
-	const estimates = [
+	// Demo fallback data
+	const demoEstimates = [
 		{ id: '1', number: 'EST-001', title: 'AC Unit Replacement', customer: 'Sarah Johnson', status: 'approved', total: 4200, sent_at: '2024-12-10', valid_until: '2024-12-25' },
 		{ id: '2', number: 'EST-002', title: 'Kitchen Remodel Phase 2', customer: 'Robert Kim', status: 'sent', total: 18500, sent_at: '2024-12-12', valid_until: '2024-12-27' },
 		{ id: '3', number: 'EST-003', title: 'Water Heater Install', customer: 'David Park', status: 'viewed', total: 2100, sent_at: '2024-12-13', valid_until: '2024-12-28' },
@@ -18,6 +19,19 @@
 		{ id: '5', number: 'EST-005', title: 'Electrical Panel Upgrade', customer: 'Amy Foster', status: 'approved', total: 3500, sent_at: '2024-12-08', valid_until: '2024-12-23' },
 		{ id: '6', number: 'EST-006', title: 'Bathroom Renovation', customer: 'Tom Williams', status: 'declined', total: 8900, sent_at: '2024-12-05', valid_until: '2024-12-20' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverEstimates = (data?.estimates ?? []) as any[];
+	const estimates = serverEstimates.length > 0 ? serverEstimates.map((e: any) => ({
+		id: e.id,
+		number: e.estimate_number ?? '',
+		title: e.title ?? '',
+		customer: e.customer_name ?? '',
+		status: e.status ?? 'draft',
+		total: Number(e.total ?? 0),
+		sent_at: e.sent_at?.split('T')[0] ?? '',
+		valid_until: e.valid_until ?? ''
+	})) : demoEstimates;
 
 	function statusVariant(status: string): 'success' | 'warning' | 'danger' | 'info' | 'default' {
 		switch (status) {

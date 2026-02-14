@@ -10,7 +10,8 @@
 	let searchQuery = $state('');
 	let statusFilter = $state('all');
 
-	const invoices = [
+	// Demo fallback data
+	const demoInvoices = [
 		{ id: '1', number: 'FF-001', customer: 'Sarah Johnson', status: 'sent', total: 4200, amount_paid: 0, due_date: '2024-12-25', job: 'AC Unit Replacement' },
 		{ id: '2', number: 'FF-002', customer: 'Robert Kim', status: 'paid', total: 18500, amount_paid: 18500, due_date: '2024-12-20', job: 'Kitchen Remodel Phase 2' },
 		{ id: '3', number: 'FF-003', customer: 'Karen White', status: 'overdue', total: 12400, amount_paid: 0, due_date: '2024-11-30', job: 'Commercial HVAC Install' },
@@ -18,6 +19,19 @@
 		{ id: '5', number: 'FF-005', customer: 'Tom Williams', status: 'paid', total: 275, amount_paid: 275, due_date: '2024-12-14', job: 'Furnace Maintenance' },
 		{ id: '6', number: 'FF-006', customer: 'Amy Foster', status: 'draft', total: 3500, amount_paid: 0, due_date: '', job: 'Electrical Panel Upgrade' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverInvoices = (data?.invoices ?? []) as any[];
+	const invoices = serverInvoices.length > 0 ? serverInvoices.map((inv: any) => ({
+		id: inv.id,
+		number: inv.invoice_number ?? '',
+		customer: inv.customer_name ?? '',
+		status: inv.status ?? 'draft',
+		total: Number(inv.total ?? 0),
+		amount_paid: Number(inv.amount_paid ?? 0),
+		due_date: inv.due_date ?? '',
+		job: inv.job_title ?? ''
+	})) : demoInvoices;
 
 	function statusVariant(status: string): 'success' | 'warning' | 'danger' | 'info' | 'default' {
 		switch (status) {
