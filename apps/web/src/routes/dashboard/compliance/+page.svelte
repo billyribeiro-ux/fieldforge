@@ -10,12 +10,17 @@
 	let { data } = $props();
 	let activeTab = $state('licenses');
 
-	const licenses = [
+	// Demo fallback data
+	const demoLicenses = [
 		{ id: '1', license_type: 'HVAC Contractor', license_number: 'HV-2024-8834', issuing_state: 'California', expiry_date: '2025-06-15', status: 'active', user_name: 'Mike Johnson' },
 		{ id: '2', license_type: 'EPA 608 Universal', license_number: 'EPA-U-44921', issuing_state: 'Federal', expiry_date: '2026-01-01', status: 'active', user_name: 'Mike Johnson' },
 		{ id: '3', license_type: 'Journeyman Plumber', license_number: 'JP-2023-1192', issuing_state: 'California', expiry_date: '2025-01-30', status: 'expiring_soon', user_name: 'Jake Rodriguez' },
 		{ id: '4', license_type: 'Electrical C-10', license_number: 'EC10-2022-5567', issuing_state: 'California', expiry_date: '2024-11-15', status: 'expired', user_name: 'Tom Williams' },
 	];
+
+	// Use server data when available, fallback to demo
+	const serverLicenses = (data?.licenses ?? []) as any[];
+	const licenses = serverLicenses.length > 0 ? serverLicenses : demoLicenses;
 
 	const policies = [
 		{ id: '1', policy_type: 'General Liability', provider: 'State Farm', policy_number: 'GL-2024-001', coverage_amount: 2000000, expiry_date: '2025-03-01', auto_renew: true },

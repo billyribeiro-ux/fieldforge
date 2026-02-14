@@ -17,7 +17,8 @@
 		{ id: 'reputation', label: 'Reputation' }
 	];
 
-	const reviews = [
+	// Demo fallback data
+	const demoReviews = [
 		{ id: '1', platform: 'google', rating: 5, reviewer: 'Sarah J.', content: 'Mike was fantastic! Replaced our AC unit in under 4 hours. Very professional and clean work. Highly recommend Smith HVAC!', date: '2024-12-10', responded: true, response: 'Thank you Sarah! We appreciate your kind words. It was a pleasure working with you!' },
 		{ id: '2', platform: 'google', rating: 5, reviewer: 'Tom W.', content: 'Great annual maintenance service. Thorough inspection and honest assessment. Fair pricing too.', date: '2024-12-08', responded: false, response: null },
 		{ id: '3', platform: 'yelp', rating: 4, reviewer: 'Mike C.', content: 'Good work on the plumbing inspection. Found a couple issues I wasn\'t aware of. Only reason for 4 stars is scheduling took a bit longer than expected.', date: '2024-12-05', responded: true, response: 'Thanks for the feedback Mike! We\'re working on improving our scheduling process.' },
@@ -25,6 +26,10 @@
 		{ id: '5', platform: 'facebook', rating: 3, reviewer: 'Karen W.', content: 'Work quality was good but the project took longer than the original estimate. Communication could have been better about the delays.', date: '2024-11-28', responded: false, response: null },
 		{ id: '6', platform: 'nextdoor', rating: 5, reviewer: 'Robert K.', content: 'Best contractor experience I\'ve ever had. The whole team was professional, on time, and the kitchen remodel looks amazing!', date: '2024-11-25', responded: true, response: 'Thank you Robert! Your kitchen turned out beautifully. Enjoy!' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverReviews = (data?.reviews ?? []) as any[];
+	const reviews = serverReviews.length > 0 ? serverReviews : demoReviews;
 
 	const referrals = [
 		{ id: '1', referrer: 'Sarah Johnson', referred: 'Amy Foster', status: 'converted', date: '2024-12-01', revenue: 3500 },

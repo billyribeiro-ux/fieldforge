@@ -11,7 +11,8 @@
 	let methodFilter = $state('all');
 	let dateRange = $state('this_month');
 
-	const payments = [
+	// Demo fallback data
+	const demoPayments = [
 		{ id: '1', invoice_number: 'FF-002', customer: 'Robert Kim', amount: 18500, method: 'card', status: 'completed', date: '2024-12-12', last4: '4242', description: 'Kitchen Remodel Phase 2' },
 		{ id: '2', invoice_number: 'FF-005', customer: 'Tom Williams', amount: 275, method: 'card', status: 'completed', date: '2024-12-11', last4: '1234', description: 'Furnace Maintenance' },
 		{ id: '3', invoice_number: 'FF-004', customer: 'Mike Chen', amount: 3400, method: 'ach', status: 'completed', date: '2024-12-10', last4: null, description: 'Office Plumbing — Partial' },
@@ -21,6 +22,10 @@
 		{ id: '7', invoice_number: 'FF-003', customer: 'Karen White', amount: 6200, method: 'card', status: 'refunded', date: '2024-12-06', last4: '9012', description: 'Commercial HVAC — Partial Refund' },
 		{ id: '8', invoice_number: null, customer: 'David Park', amount: 500, method: 'card', status: 'failed', date: '2024-12-05', last4: '3456', description: 'Water Heater Deposit' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverPayments = (data?.payments ?? []) as any[];
+	const payments = serverPayments.length > 0 ? serverPayments : demoPayments;
 
 	const methodOptions = [
 		{ value: 'all', label: 'All Methods' },

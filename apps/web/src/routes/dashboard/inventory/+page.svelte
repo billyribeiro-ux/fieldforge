@@ -10,7 +10,8 @@
 	let searchQuery = $state('');
 	let categoryFilter = $state('all');
 
-	const inventory = [
+	// Demo fallback data
+	const demoInventory = [
 		{ id: '1', name: 'Copper Fittings (1/2")', sku: 'CF-050', category: 'Plumbing', quantity: 12, min_quantity: 20, unit_cost: 3.50, location: 'Warehouse A', status: 'low' },
 		{ id: '2', name: 'PVC Pipe (2" x 10ft)', sku: 'PVC-210', category: 'Plumbing', quantity: 45, min_quantity: 20, unit_cost: 8.75, location: 'Warehouse A', status: 'ok' },
 		{ id: '3', name: 'R-410A Refrigerant (25lb)', sku: 'REF-410', category: 'HVAC', quantity: 8, min_quantity: 5, unit_cost: 125.00, location: 'Truck #1', status: 'ok' },
@@ -20,6 +21,10 @@
 		{ id: '7', name: 'Wire Nuts (Yellow)', sku: 'WN-YEL', category: 'Electrical', quantity: 200, min_quantity: 50, unit_cost: 0.15, location: 'All Trucks', status: 'ok' },
 		{ id: '8', name: 'Solder (Lead-Free Roll)', sku: 'SLD-LF', category: 'Plumbing', quantity: 6, min_quantity: 5, unit_cost: 22.00, location: 'Truck #2', status: 'ok' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverInventory = (data?.items ?? []) as any[];
+	const inventory = serverInventory.length > 0 ? serverInventory : demoInventory;
 
 	let filteredInventory = $derived(
 		inventory.filter((item) => {

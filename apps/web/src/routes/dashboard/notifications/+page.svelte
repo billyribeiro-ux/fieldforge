@@ -9,7 +9,8 @@
 	let { data } = $props();
 	let filter = $state<'all' | 'unread'>('all');
 
-	const notifications = [
+	// Demo fallback data
+	const demoNotifications = [
 		{ id: '1', type: 'job_completed', title: 'Job Completed', body: 'AC Unit Replacement for Sarah Johnson has been marked complete.', read: false, created_at: '2024-12-12T14:30:00Z' },
 		{ id: '2', type: 'payment_received', title: 'Payment Received', body: '$3,500.00 payment received for Invoice #INV-2024-042.', read: false, created_at: '2024-12-12T12:15:00Z' },
 		{ id: '3', type: 'new_message', title: 'New Message', body: 'Tom Williams sent a message about his upcoming appointment.', read: false, created_at: '2024-12-12T10:00:00Z' },
@@ -19,6 +20,10 @@
 		{ id: '7', type: 'inventory_alert', title: 'Low Inventory', body: 'Copper Pipe 3/4" is below minimum stock level (5 remaining).', read: true, created_at: '2024-12-10T11:30:00Z' },
 		{ id: '8', type: 'review_received', title: 'New Review', body: 'Sarah J. left a 5-star review on Google.', read: true, created_at: '2024-12-10T08:00:00Z' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverNotifications = (data?.notifications ?? []) as any[];
+	const notifications = serverNotifications.length > 0 ? serverNotifications : demoNotifications;
 
 	let filtered = $derived(filter === 'unread' ? notifications.filter((n) => !n.read) : notifications);
 	let unreadCount = $derived(notifications.filter((n) => !n.read).length);

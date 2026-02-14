@@ -7,7 +7,8 @@
 
 
 	let { data } = $props();
-	const vehicles = [
+	// Demo fallback data
+	const demoVehicles = [
 		{
 			id: '1', name: 'Truck #1', make: 'Ford', model: 'F-250', year: 2022, vin: '1FTBF2B6XNEE12345',
 			license_plate: 'TX-ABC-1234', assigned_to: 'Mike Thompson', status: 'active',
@@ -33,6 +34,10 @@
 			insurance_expiry: '2025-06-30', registration_expiry: '2025-01-10'
 		}
 	];
+
+	// Use server data when available, fallback to demo
+	const serverVehicles = (data?.vehicles ?? []) as any[];
+	const vehicles = serverVehicles.length > 0 ? serverVehicles : demoVehicles;
 
 	function isServiceDueSoon(date: string): boolean {
 		const d = new Date(date);

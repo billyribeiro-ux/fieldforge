@@ -8,7 +8,8 @@
 
 
 	let { data } = $props();
-	const rules = [
+	// Demo fallback data
+	const demoRules = [
 		{
 			id: '1', name: 'Send follow-up after job completion', trigger_event: 'job.completed',
 			actions: { type: 'send_email', template: 'follow_up' }, delay_minutes: 1440,
@@ -35,6 +36,10 @@
 			is_active: true, trigger_count: 15, last_triggered_at: '2024-12-08T09:00:00Z'
 		},
 	];
+
+	// Use server data when available, fallback to demo
+	const serverRules = (data?.rules ?? []) as any[];
+	const rules = serverRules.length > 0 ? serverRules : demoRules;
 
 	let activeCount = $derived(rules.filter(r => r.is_active).length);
 

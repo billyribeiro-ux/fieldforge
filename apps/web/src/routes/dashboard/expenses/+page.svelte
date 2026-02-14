@@ -15,7 +15,8 @@
 	let categoryFilter = $state('all');
 	let showAddModal = $state(false);
 
-	const expenses = [
+	// Demo fallback data
+	const demoExpenses = [
 		{ id: '1', description: 'Carrier 24ACC636 AC Unit', category: 'materials', amount: 2400, vendor: 'HVAC Supply Co', expense_date: '2024-12-10', job: 'AC Unit Replacement', is_billable: true, reimbursed: false },
 		{ id: '2', description: 'Copper pipe fittings (assorted)', category: 'materials', amount: 185.50, vendor: 'Home Depot', expense_date: '2024-12-09', job: 'Kitchen Remodel Phase 2', is_billable: true, reimbursed: false },
 		{ id: '3', description: 'Fuel — Service Van #1', category: 'fuel', amount: 78.42, vendor: 'Shell', expense_date: '2024-12-09', job: null, is_billable: false, reimbursed: false },
@@ -25,6 +26,10 @@
 		{ id: '7', description: 'Office supplies', category: 'overhead', amount: 42.30, vendor: 'Staples', expense_date: '2024-12-05', job: null, is_billable: false, reimbursed: false },
 		{ id: '8', description: 'Mileage — 47 miles', category: 'mileage', amount: 30.55, vendor: null, expense_date: '2024-12-04', job: 'Furnace Maintenance', is_billable: true, reimbursed: true }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverExpenses = (data?.expenses ?? []) as any[];
+	const expenses = serverExpenses.length > 0 ? serverExpenses : demoExpenses;
 
 	const categories = [
 		{ value: 'all', label: 'All Categories' },

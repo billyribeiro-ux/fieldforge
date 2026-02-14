@@ -7,7 +7,8 @@
 
 
 	let { data } = $props();
-	const technicians = [
+	// Demo fallback data
+	const demoTechnicians = [
 		{
 			id: '1', name: 'Mike Thompson', status: 'on_job', phone: '(512) 555-0101',
 			currentJob: { title: 'AC Unit Replacement', customer: 'Sarah Johnson', address: '123 Oak St', eta: null, progress: 65 },
@@ -27,6 +28,10 @@
 			jobsToday: 4, jobsCompleted: 1, lat: 30.2500, lng: -97.7500
 		}
 	];
+
+	// Use server data when available, fallback to demo
+	const serverTechnicians = (data?.jobs ?? []) as any[];
+	const technicians = serverTechnicians.length > 0 ? serverTechnicians : demoTechnicians;
 
 	const unassignedJobs = [
 		{ id: '1', title: 'Roof Leak Assessment', customer: 'Karen White', address: '147 Walnut Way', priority: 'high', scheduledTime: 'Today, 4:00 PM' },

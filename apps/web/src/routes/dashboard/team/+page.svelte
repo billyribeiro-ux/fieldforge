@@ -15,7 +15,8 @@
 	let roleFilter = $state('all');
 	let showInviteModal = $state(false);
 
-	const members = [
+	// Demo fallback data
+	const demoMembers = [
 		{ id: '1', first_name: 'Mike', last_name: 'Thompson', email: 'mike@smithhvac.com', phone: '(512) 555-0101', role: 'technician', status: 'on_job', avatar: null, hourly_rate: 45, jobs_today: 3, jobs_completed: 2, utilization: 87 },
 		{ id: '2', first_name: 'Jake', last_name: 'Rodriguez', email: 'jake@smithhvac.com', phone: '(512) 555-0102', role: 'technician', status: 'available', avatar: null, hourly_rate: 42, jobs_today: 2, jobs_completed: 2, utilization: 78 },
 		{ id: '3', first_name: 'Sarah', last_name: 'Lee', email: 'sarah@smithhvac.com', phone: '(512) 555-0103', role: 'technician', status: 'en_route', avatar: null, hourly_rate: 40, jobs_today: 4, jobs_completed: 1, utilization: 92 },
@@ -23,6 +24,10 @@
 		{ id: '5', first_name: 'Emily', last_name: 'Chen', email: 'emily@smithhvac.com', phone: '(512) 555-0104', role: 'office_staff', status: 'available', avatar: null, hourly_rate: 25, jobs_today: 0, jobs_completed: 0, utilization: 0 },
 		{ id: '6', first_name: 'Carlos', last_name: 'Martinez', email: 'carlos@smithhvac.com', phone: '(512) 555-0105', role: 'apprentice', status: 'off_duty', avatar: null, hourly_rate: 22, jobs_today: 0, jobs_completed: 0, utilization: 0 }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverMembers = (data?.members ?? []) as any[];
+	const members = serverMembers.length > 0 ? serverMembers : demoMembers;
 
 	const roleOptions = [
 		{ value: 'all', label: 'All Roles' },
