@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { enhance } from '$app/forms';
 	import TopBar from '$lib/components/layout/TopBar.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -141,20 +142,26 @@
 	{#snippet actions()}
 		<div class="flex items-center gap-2">
 			{#if job.status === 'in_progress'}
-				<Button variant="primary" size="md">
-					<Square class="w-4 h-4" />
-					Complete Job
-				</Button>
+				<form method="POST" action="?/updateStatus" use:enhance>
+					<input type="hidden" name="status" value="completed" />
+					<Button variant="primary" size="md" type="submit">
+						<Square class="w-4 h-4" />
+						Complete Job
+					</Button>
+				</form>
 			{:else if job.status === 'completed'}
-				<Button variant="primary" size="md">
+				<Button variant="primary" size="md" href={`/dashboard/invoices/new?job_id=${job.id}&customer_id=${job.customer?.id ?? ''}`}>
 					<FileText class="w-4 h-4" />
 					Create Invoice
 				</Button>
 			{:else if job.status === 'scheduled'}
-				<Button variant="primary" size="md">
-					<Play class="w-4 h-4" />
-					Start Job
-				</Button>
+				<form method="POST" action="?/updateStatus" use:enhance>
+					<input type="hidden" name="status" value="in_progress" />
+					<Button variant="primary" size="md" type="submit">
+						<Play class="w-4 h-4" />
+						Start Job
+					</Button>
+				</form>
 			{/if}
 		</div>
 	{/snippet}

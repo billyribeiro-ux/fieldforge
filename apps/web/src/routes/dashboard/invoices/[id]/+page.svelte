@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { enhance } from '$app/forms';
 	import TopBar from '$lib/components/layout/TopBar.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -116,12 +117,13 @@
 		return c.charAt(0).toUpperCase() + c.slice(1);
 	}
 
-	async function recordPayment() {
+	function handlePaymentSubmit() {
 		recordingPayment = true;
-		// TODO: API call to record payment
-		await new Promise((r) => setTimeout(r, 1000));
-		recordingPayment = false;
-		showPaymentModal = false;
+		return async ({ update }: { update: () => Promise<void> }) => {
+			recordingPayment = false;
+			showPaymentModal = false;
+			await update();
+		};
 	}
 </script>
 
@@ -140,6 +142,14 @@
 				<Download class="w-4 h-4" />
 				PDF
 			</Button>
+			{#if invoice.status === 'draft'}
+				<form method="POST" action="?/send" use:enhance>
+					<Button variant="outline" size="md" type="submit">
+						<Send class="w-4 h-4" />
+						Send
+					</Button>
+				</form>
+			{/if}
 			{#if invoice.status !== 'paid' && invoice.status !== 'void'}
 				<Button variant="primary" size="md" onclick={() => (showPaymentModal = true)}>
 					<DollarSign class="w-4 h-4" />
@@ -419,10 +429,15 @@
 	</div>
 
 	{#snippet footer()}
-		<Button variant="ghost" onclick={() => (showPaymentModal = false)}>Cancel</Button>
-		<Button variant="primary" loading={recordingPayment} onclick={recordPayment}>
-			<CheckCircle2 class="w-4 h-4" />
-			Record Payment
-		</Button>
+		<form method="POST" action="?/recordPayment" use:enhance={handlePaymentSubmit} class="flex items-center gap-2 w-full justify-end">
+			<input type="hidden" name="amount" value={paymentAmount} />
+			<input type="hidden" name="method" value={paymentMethod} />
+			<input type="hidden" name="reference" value={paymentMethod === 'check' ? checkNumber : paymentNotes} />
+			<Button variant="ghost" onclick={() => (showPaymentModal = false)}>Cancel</Button>
+			<Button variant="primary" loading={recordingPayment} type="submit">
+				<CheckCircle2 class="w-4 h-4" />
+				Record Payment
+			</Button>
+		</form>
 	{/snippet}
 </Modal>

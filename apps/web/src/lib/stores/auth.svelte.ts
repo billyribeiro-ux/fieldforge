@@ -30,6 +30,19 @@ class AuthStore {
 		}
 	}
 
+	private setSession(token: string, refreshToken: string, user: User) {
+		this.token = token;
+		this.user = user;
+		api.setToken(token);
+
+		localStorage.setItem('ff_token', token);
+		localStorage.setItem('ff_refresh_token', refreshToken);
+		localStorage.setItem('ff_user', JSON.stringify(user));
+
+		// Set cookie so SSR load functions can access the token
+		document.cookie = `ff_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+	}
+
 	async login(email: string, password: string) {
 		const res = await api.post<{
 			token: string;
@@ -37,13 +50,7 @@ class AuthStore {
 			user: User;
 		}>('/auth/login', { email, password });
 
-		this.token = res.data.token;
-		this.user = res.data.user;
-		api.setToken(res.data.token);
-
-		localStorage.setItem('ff_token', res.data.token);
-		localStorage.setItem('ff_refresh_token', res.data.refresh_token);
-		localStorage.setItem('ff_user', JSON.stringify(res.data.user));
+		this.setSession(res.data.token, res.data.refresh_token, res.data.user);
 	}
 
 	async register(data: {
@@ -60,13 +67,7 @@ class AuthStore {
 			user: User;
 		}>('/auth/register', data);
 
-		this.token = res.data.token;
-		this.user = res.data.user;
-		api.setToken(res.data.token);
-
-		localStorage.setItem('ff_token', res.data.token);
-		localStorage.setItem('ff_refresh_token', res.data.refresh_token);
-		localStorage.setItem('ff_user', JSON.stringify(res.data.user));
+		this.setSession(res.data.token, res.data.refresh_token, res.data.user);
 	}
 
 	logout() {
@@ -76,6 +77,8 @@ class AuthStore {
 		localStorage.removeItem('ff_token');
 		localStorage.removeItem('ff_refresh_token');
 		localStorage.removeItem('ff_user');
+		// Clear the cookie
+		document.cookie = 'ff_token=; path=/; max-age=0';
 	}
 
 	get fullName() {

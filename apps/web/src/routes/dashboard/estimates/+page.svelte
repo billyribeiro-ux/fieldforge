@@ -69,7 +69,7 @@
 
 <TopBar title="Estimates">
 	{#snippet actions()}
-		<Button variant="primary" size="md">
+		<Button variant="primary" size="md" href="/dashboard/estimates/new">
 			<Plus class="w-4 h-4" />
 			New Estimate
 		</Button>

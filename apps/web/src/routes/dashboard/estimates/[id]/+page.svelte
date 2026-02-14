@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { enhance } from '$app/forms';
 	import TopBar from '$lib/components/layout/TopBar.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -120,15 +121,19 @@
 				Edit
 			</Button>
 			{#if estimate.status === 'draft'}
-				<Button variant="primary" size="md">
-					<Send class="w-4 h-4" />
-					Send
-				</Button>
+				<form method="POST" action="?/send" use:enhance>
+					<Button variant="primary" size="md" type="submit">
+						<Send class="w-4 h-4" />
+						Send
+					</Button>
+				</form>
 			{:else if estimate.status === 'approved'}
-				<Button variant="primary" size="md">
-					<FileText class="w-4 h-4" />
-					Convert to Invoice
-				</Button>
+				<form method="POST" action="?/convertToInvoice" use:enhance>
+					<Button variant="primary" size="md" type="submit">
+						<FileText class="w-4 h-4" />
+						Convert to Invoice
+					</Button>
+				</form>
 			{/if}
 		</div>
 	{/snippet}

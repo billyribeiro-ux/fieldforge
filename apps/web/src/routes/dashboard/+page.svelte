@@ -57,7 +57,8 @@
 		}
 	];
 
-	const recentJobs = [
+	// Demo fallback data
+	const demoRecentJobs = [
 		{
 			id: '1',
 			title: 'AC Unit Replacement',
@@ -105,6 +106,17 @@
 		}
 	];
 
+	// Use server data when available, fallback to demo
+	const recentJobs = serverJobs.length > 0 ? serverJobs.map((j: any) => ({
+		id: j.id,
+		title: j.title ?? '',
+		customer: `${j.customer_first_name ?? ''} ${j.customer_last_name ?? ''}`.trim() || 'Unknown',
+		status: j.status ?? 'lead',
+		priority: j.priority ?? 'normal',
+		scheduled: j.scheduled_date ?? '',
+		address: ''
+	})) : demoRecentJobs;
+
 	const todaySchedule = [
 		{ time: '8:00 AM', title: 'Team standup', type: 'meeting' },
 		{ time: '9:00 AM', title: 'AC Unit Replacement — Sarah Johnson', type: 'job' },
@@ -126,7 +138,7 @@
 
 <TopBar title="Dashboard">
 	{#snippet actions()}
-		<Button variant="primary" size="md">
+		<Button variant="primary" size="md" href="/dashboard/jobs/new">
 			<Plus class="w-4 h-4" />
 			New Job
 		</Button>

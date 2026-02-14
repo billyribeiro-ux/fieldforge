@@ -69,12 +69,10 @@
 
 <TopBar title="Invoices">
 	{#snippet actions()}
-		<a href="/dashboard/invoices/new">
-			<Button variant="primary" size="md">
-				<Plus class="w-4 h-4" />
-				New Invoice
-			</Button>
-		</a>
+		<Button variant="primary" size="md" href="/dashboard/invoices/new">
+			<Plus class="w-4 h-4" />
+			New Invoice
+		</Button>
 	{/snippet}
 </TopBar>
 

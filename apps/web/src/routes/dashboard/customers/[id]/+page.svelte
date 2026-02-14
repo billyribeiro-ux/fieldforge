@@ -115,7 +115,7 @@
 				<Edit class="w-4 h-4" />
 				Edit
 			</Button>
-			<Button variant="primary" size="md">
+			<Button variant="primary" size="md" href={`/dashboard/jobs/new?customer_id=${customer.id}`}>
 				<Plus class="w-4 h-4" />
 				New Job
 			</Button>
