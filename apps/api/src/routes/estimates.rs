@@ -227,12 +227,52 @@ async fn get_estimate(
 }
 
 async fn update_estimate(
-    State(_state): State<Arc<AppState>>,
-    Path(_id): Path<Uuid>,
-    Json(_body): Json<serde_json::Value>,
+    State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
+    Path(id): Path<Uuid>,
+    Json(body): Json<serde_json::Value>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    // TODO: implement partial update for estimate fields + line items
-    Ok(Json(json!({ "data": null, "meta": { "message": "Not yet implemented" }, "errors": null })))
+    let team_id = auth.team_id.unwrap_or_default();
+
+    // Verify estimate exists and belongs to team
+    let _existing = sqlx::query_as::<_, crate::models::estimate::Estimate>(
+        "SELECT * FROM estimates WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL",
+    )
+    .bind(id)
+    .bind(team_id)
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or_else(|| ApiError::NotFound("Estimate".into()))?;
+
+    let updated = sqlx::query_as::<_, crate::models::estimate::Estimate>(
+        r#"
+        UPDATE estimates SET
+            title = COALESCE($3, title),
+            scope_of_work = COALESCE($4, scope_of_work),
+            valid_until = COALESCE($5::date, valid_until),
+            payment_terms = COALESCE($6, payment_terms),
+            warranty_terms = COALESCE($7, warranty_terms),
+            terms_and_conditions = COALESCE($8, terms_and_conditions)
+        WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL
+        RETURNING *
+        "#,
+    )
+    .bind(id)
+    .bind(team_id)
+    .bind(body.get("title").and_then(|v| v.as_str()))
+    .bind(body.get("scope_of_work").and_then(|v| v.as_str()))
+    .bind(body.get("valid_until").and_then(|v| v.as_str()))
+    .bind(body.get("payment_terms").and_then(|v| v.as_str()))
+    .bind(body.get("warranty_terms").and_then(|v| v.as_str()))
+    .bind(body.get("terms_and_conditions").and_then(|v| v.as_str()))
+    .fetch_one(&state.db)
+    .await?;
+
+    Ok(Json(json!({
+        "data": updated,
+        "meta": null,
+        "errors": null,
+    })))
 }
 
 async fn send_estimate(
