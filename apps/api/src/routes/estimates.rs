@@ -487,9 +487,90 @@ async fn convert_to_invoice(
 }
 
 async fn duplicate_estimate(
-    State(_state): State<Arc<AppState>>,
-    Path(_id): Path<Uuid>,
+    State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
+    Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    // TODO: duplicate estimate with new number + draft status
-    Ok(Json(json!({ "data": null, "meta": { "message": "Not yet implemented" }, "errors": null })))
+    let team_id = auth.team_id.unwrap_or_default();
+
+    // Fetch original estimate
+    let original = sqlx::query_as::<_, crate::models::estimate::Estimate>(
+        "SELECT * FROM estimates WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL",
+    )
+    .bind(id)
+    .bind(team_id)
+    .fetch_optional(&state.db)
+    .await?
+    .ok_or_else(|| ApiError::NotFound("Estimate".into()))?;
+
+    // Get next estimate number
+    let next_number = sqlx::query_scalar::<_, i32>(
+        "UPDATE teams SET estimate_next_number = estimate_next_number + 1 WHERE id = $1 RETURNING estimate_next_number - 1",
+    )
+    .bind(team_id)
+    .fetch_one(&state.db)
+    .await?;
+
+    let prefix = sqlx::query_scalar::<_, Option<String>>(
+        "SELECT estimate_prefix FROM teams WHERE id = $1",
+    )
+    .bind(team_id)
+    .fetch_one(&state.db)
+    .await?
+    .unwrap_or_else(|| "EST".into());
+
+    let estimate_number = format!("{}-{:04}", prefix, next_number);
+
+    // Create duplicate as draft
+    let duplicate = sqlx::query_as::<_, crate::models::estimate::Estimate>(
+        r#"
+        INSERT INTO estimates (team_id, customer_id, job_id, property_id, estimate_number, status, title, scope_of_work,
+            subtotal, discount_amount, discount_pct, tax_amount, tax_rate, total, deposit_required_pct, deposit_amount,
+            valid_until, payment_terms, warranty_terms, terms_and_conditions, portal_token)
+        VALUES ($1, $2, $3, $4, $5, 'draft'::estimate_status, $6, $7,
+            $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        RETURNING *
+        "#,
+    )
+    .bind(team_id)
+    .bind(original.customer_id)
+    .bind(original.job_id)
+    .bind(original.property_id)
+    .bind(&estimate_number)
+    .bind(&original.title)
+    .bind(&original.scope_of_work)
+    .bind(original.subtotal)
+    .bind(original.discount_amount)
+    .bind(original.discount_pct)
+    .bind(original.tax_amount)
+    .bind(original.tax_rate)
+    .bind(original.total)
+    .bind(original.deposit_required_pct)
+    .bind(original.deposit_amount)
+    .bind(original.valid_until)
+    .bind(&original.payment_terms)
+    .bind(&original.warranty_terms)
+    .bind(&original.terms_and_conditions)
+    .bind(Uuid::new_v4().to_string())
+    .fetch_one(&state.db)
+    .await?;
+
+    // Duplicate line items
+    sqlx::query(
+        r#"
+        INSERT INTO line_items (estimate_id, description, category, quantity, unit, unit_price, total, taxable, sort_order)
+        SELECT $2, description, category, quantity, unit, unit_price, total, taxable, sort_order
+        FROM line_items WHERE estimate_id = $1
+        "#,
+    )
+    .bind(id)
+    .bind(duplicate.id)
+    .execute(&state.db)
+    .await?;
+
+    Ok(Json(json!({
+        "data": duplicate,
+        "meta": null,
+        "errors": null,
+    })))
 }
