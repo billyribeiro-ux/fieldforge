@@ -5,6 +5,8 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { Plus, Search, Receipt, MoreHorizontal } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let searchQuery = $state('');
 	let statusFilter = $state('all');
 

@@ -21,6 +21,8 @@
 		ExternalLink
 	} from 'lucide-svelte';
 
+
+	let { data } = $props();
 	const invoice = {
 		id: page.params.id,
 		number: 'FF-001',

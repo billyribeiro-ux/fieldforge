@@ -16,6 +16,8 @@
 		ChevronDown
 	} from 'lucide-svelte';
 
+	let { data } = $props();
+
 	let showCreateJob = $state(false);
 	let searchQuery = $state('');
 	let statusFilter = $state('all');

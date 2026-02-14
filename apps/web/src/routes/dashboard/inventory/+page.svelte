@@ -5,6 +5,8 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { Plus, Search, Package, AlertTriangle, MoreHorizontal, Truck } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let searchQuery = $state('');
 	let categoryFilter = $state('all');
 

@@ -21,6 +21,8 @@
 		Edit
 	} from 'lucide-svelte';
 
+
+	let { data } = $props();
 	const customer = {
 		id: page.params.id,
 		first_name: 'Sarah',

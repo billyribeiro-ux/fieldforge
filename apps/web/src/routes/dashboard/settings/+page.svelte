@@ -15,6 +15,8 @@
 		FileText
 	} from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let activeTab = $state('company');
 
 	const tabs = [

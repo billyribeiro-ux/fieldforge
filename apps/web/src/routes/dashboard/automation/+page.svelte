@@ -6,6 +6,8 @@
 	import Switch from '$lib/components/ui/Switch.svelte';
 	import { Zap, Plus, Clock, ArrowRight, Mail, MessageSquare, Bell } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	const rules = [
 		{
 			id: '1', name: 'Send follow-up after job completion', trigger_event: 'job.completed',

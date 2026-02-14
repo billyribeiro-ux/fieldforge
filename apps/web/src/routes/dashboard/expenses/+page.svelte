@@ -9,6 +9,8 @@
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import { Plus, Search, DollarSign, TrendingUp, Receipt, Filter } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let searchQuery = $state('');
 	let categoryFilter = $state('all');
 	let showAddModal = $state(false);

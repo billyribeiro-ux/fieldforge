@@ -5,6 +5,8 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { Search, DollarSign, CreditCard, Banknote, TrendingUp, ArrowDownRight, ArrowUpRight, Download } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let searchQuery = $state('');
 	let methodFilter = $state('all');
 	let dateRange = $state('this_month');

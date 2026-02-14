@@ -18,6 +18,8 @@
 		Clock
 	} from 'lucide-svelte';
 
+
+	let { data } = $props();
 	const estimate = {
 		id: page.params.id,
 		number: 'EST-001',

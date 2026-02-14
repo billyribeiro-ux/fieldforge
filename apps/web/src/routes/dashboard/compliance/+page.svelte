@@ -6,6 +6,8 @@
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { ShieldCheck, FileText, AlertTriangle, Plus, Calendar, Building2 } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let activeTab = $state('licenses');
 
 	const licenses = [

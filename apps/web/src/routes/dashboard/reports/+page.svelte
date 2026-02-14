@@ -15,6 +15,8 @@
 		Calendar
 	} from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let dateRange = $state('this_month');
 
 	const revenueData = {

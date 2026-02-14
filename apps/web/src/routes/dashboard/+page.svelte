@@ -16,7 +16,12 @@
 		CheckCircle2
 	} from 'lucide-svelte';
 
-	// Demo data — will be replaced with API calls
+	let { data } = $props();
+
+	// Use server data when available, fallback to demo
+	const serverJobs = (data?.recentJobs ?? []) as any[];
+	const serverCustomers = (data?.recentCustomers ?? []) as any[];
+
 	const stats = [
 		{
 			title: 'Active Jobs',

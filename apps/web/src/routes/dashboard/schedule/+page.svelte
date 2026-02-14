@@ -5,6 +5,8 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import { Plus, ChevronLeft, ChevronRight, Clock, MapPin, User } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let currentDate = $state(new Date());
 	let viewMode = $state<'day' | 'week' | 'month'>('week');
 

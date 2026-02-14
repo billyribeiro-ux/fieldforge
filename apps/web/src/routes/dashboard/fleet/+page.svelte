@@ -5,6 +5,8 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { Plus, Truck, MapPin, Fuel, Wrench, AlertTriangle, Calendar } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	const vehicles = [
 		{
 			id: '1', name: 'Truck #1', make: 'Ford', model: 'F-250', year: 2022, vin: '1FTBF2B6XNEE12345',

@@ -15,6 +15,8 @@
 		Users
 	} from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let showCreateCustomer = $state(false);
 	let searchQuery = $state('');
 	let viewMode = $state<'table' | 'grid'>('table');

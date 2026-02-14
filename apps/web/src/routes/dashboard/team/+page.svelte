@@ -9,6 +9,8 @@
 	import Avatar from '$lib/components/ui/Avatar.svelte';
 	import { Plus, Search, Phone, Mail, MapPin, Clock, MoreHorizontal, Shield } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let searchQuery = $state('');
 	let roleFilter = $state('all');
 	let showInviteModal = $state(false);

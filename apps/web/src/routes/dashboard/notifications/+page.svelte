@@ -5,6 +5,8 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { Bell, CheckCheck, Briefcase, Receipt, Calendar, MessageSquare, AlertTriangle, Users, Trash2 } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let filter = $state<'all' | 'unread'>('all');
 
 	const notifications = [

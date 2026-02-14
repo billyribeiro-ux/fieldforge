@@ -5,6 +5,8 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { MapPin, Clock, Phone, Navigation, User, ChevronRight, AlertTriangle, CheckCircle2 } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	const technicians = [
 		{
 			id: '1', name: 'Mike Thompson', status: 'on_job', phone: '(512) 555-0101',

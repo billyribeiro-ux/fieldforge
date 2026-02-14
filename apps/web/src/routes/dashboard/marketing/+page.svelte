@@ -7,6 +7,8 @@
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import { Star, MessageSquare, TrendingUp, Users, ThumbsUp, ThumbsDown, ExternalLink, Send, Globe, Award } from 'lucide-svelte';
 
+
+	let { data } = $props();
 	let activeTab = $state('reviews');
 
 	const tabs = [

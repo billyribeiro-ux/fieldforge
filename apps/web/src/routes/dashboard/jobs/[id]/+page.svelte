@@ -25,6 +25,8 @@
 		AlertTriangle
 	} from 'lucide-svelte';
 
+
+	let { data } = $props();
 	// Demo data — would come from API based on page.params.id
 	const job = {
 		id: page.params.id,
