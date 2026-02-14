@@ -14,8 +14,8 @@
 
 	const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-	// Demo scheduled jobs
-	const scheduledJobs = [
+	// Demo fallback data
+	const demoScheduledJobs = [
 		{ id: '1', title: 'AC Unit Replacement', customer: 'Sarah Johnson', technician: 'Mike T.', day: 0, startHour: 9, duration: 4, color: 'bg-forge-100 border-forge-400 text-forge-800' },
 		{ id: '2', title: 'Plumbing Inspection', customer: 'Mike Chen', technician: 'Jake R.', day: 0, startHour: 13, duration: 2, color: 'bg-blue-100 border-blue-400 text-blue-800' },
 		{ id: '3', title: 'Emergency Leak Repair', customer: 'Lisa Rodriguez', technician: 'Mike T.', day: 0, startHour: 11, duration: 2, color: 'bg-red-100 border-red-400 text-red-800' },
@@ -24,6 +24,10 @@
 		{ id: '6', title: 'Water Heater Install', customer: 'David Park', technician: 'Mike T.', day: 3, startHour: 9, duration: 5, color: 'bg-purple-100 border-purple-400 text-purple-800' },
 		{ id: '7', title: 'Duct Cleaning', customer: 'Karen White', technician: 'Sarah L.', day: 4, startHour: 8, duration: 3, color: 'bg-orange-100 border-orange-400 text-orange-800' }
 	];
+
+	// Use server data when available, fallback to demo
+	const serverScheduledJobs = (data?.scheduledJobs ?? []) as any[];
+	const scheduledJobs = serverScheduledJobs.length > 0 ? serverScheduledJobs : demoScheduledJobs;
 
 	function getDateString(): string {
 		return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
