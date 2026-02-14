@@ -80,14 +80,45 @@ async fn update_job(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
-    Json(_req): Json<UpdateJobRequest>,
+    Json(req): Json<UpdateJobRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
     let team_id = auth.team_id.unwrap_or_default();
-    let job = repository::get_job(&state.db, team_id, id).await?;
+    // Verify job exists and belongs to team
+    let _existing = repository::get_job(&state.db, team_id, id).await?;
 
-    // TODO: apply partial update fields
+    let updated = sqlx::query_as::<_, crate::models::job::Job>(
+        r#"
+        UPDATE jobs SET
+            title = COALESCE($3, title),
+            description = COALESCE($4, description),
+            priority = COALESCE($5::job_priority, priority),
+            assigned_to = COALESCE($6, assigned_to),
+            scheduled_date = COALESCE($7, scheduled_date),
+            scheduled_start_time = COALESCE($8, scheduled_start_time),
+            scheduled_end_time = COALESCE($9, scheduled_end_time),
+            estimated_duration_minutes = COALESCE($10, estimated_duration_minutes),
+            internal_notes = COALESCE($11, internal_notes),
+            version = version + 1
+        WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL
+        RETURNING *
+        "#,
+    )
+    .bind(id)
+    .bind(team_id)
+    .bind(&req.title)
+    .bind(&req.description)
+    .bind(&req.priority)
+    .bind(req.assigned_to)
+    .bind(req.scheduled_date)
+    .bind(req.scheduled_start_time)
+    .bind(req.scheduled_end_time)
+    .bind(req.estimated_duration_minutes)
+    .bind(&req.internal_notes)
+    .fetch_one(&state.db)
+    .await?;
+
     Ok(Json(json!({
-        "data": job,
+        "data": updated,
         "meta": null,
         "errors": null,
     })))
