@@ -1,6 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
+import { env } from '$env/dynamic/public';
 
-const API_BASE = process.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+const API_BASE = env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// Extract auth token from cookies

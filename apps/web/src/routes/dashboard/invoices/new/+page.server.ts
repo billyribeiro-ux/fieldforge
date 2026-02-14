@@ -1,5 +1,5 @@
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import { serverFetch, serverPost } from '$lib/api/server';
 
 export const load: ServerLoad = async ({ locals, url }) => {
@@ -54,6 +54,7 @@ export const actions: Actions = {
 
 			redirect(303, `/dashboard/invoices/${(data as { id: string }).id}`);
 		} catch (e) {
+			if (isRedirect(e)) throw e;
 			return fail(500, { error: e instanceof Error ? e.message : 'Failed to create invoice' });
 		}
 	}

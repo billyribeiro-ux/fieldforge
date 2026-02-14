@@ -1,11 +1,14 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import TopBar from '$lib/components/layout/TopBar.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
-	import { ArrowLeft, Plus, Trash2, Send, Save } from 'lucide-svelte';
+	import { ArrowLeft, Plus, Trash2, Send, Save, Loader2 } from 'lucide-svelte';
+
+	let { form: formResult } = $props();
 
 	let customerId = $state('');
 	let dueDate = $state('');
@@ -75,14 +78,15 @@
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n);
 	}
 
-	let saving = $state(false);
+	let submitting = $state(false);
 
-	async function handleSave() {
-		saving = true;
-		// TODO: Call API to create invoice
-		await new Promise((r) => setTimeout(r, 1000));
-		saving = false;
-	}
+	let serializedLineItems = $derived(JSON.stringify(lineItems.map(item => ({
+		description: item.description,
+		category: item.category,
+		quantity: item.quantity,
+		unit: item.unit,
+		unit_price: item.unit_price
+	}))));
 </script>
 
 <svelte:head>
@@ -91,20 +95,31 @@
 
 <TopBar>
 	{#snippet actions()}
-		<div class="flex items-center gap-2">
-			<Button variant="outline" size="md" onclick={handleSave} disabled={saving}>
-				<Save class="w-4 h-4" />
-				{saving ? 'Saving...' : 'Save Draft'}
-			</Button>
-			<Button variant="primary" size="md" disabled={saving}>
-				<Send class="w-4 h-4" />
-				Send Invoice
-			</Button>
-		</div>
+		<Button variant="outline" size="sm" href="/dashboard/invoices">
+			<ArrowLeft class="w-4 h-4" />
+			Cancel
+		</Button>
 	{/snippet}
 </TopBar>
 
+<form method="POST" action="?/create" use:enhance={() => {
+	submitting = true;
+	return async ({ update }) => {
+		submitting = false;
+		await update();
+	};
+}}>
+	<input type="hidden" name="customer_id" value={customerId} />
+	<input type="hidden" name="due_date" value={dueDate} />
+	<input type="hidden" name="line_items" value={serializedLineItems} />
+
 <div class="p-6 space-y-6">
+	{#if formResult?.error}
+		<div class="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-3 rounded-xl text-sm">
+			{formResult.error}
+		</div>
+	{/if}
+
 	<!-- Header -->
 	<div class="flex items-center gap-4">
 		<a href="/dashboard/invoices" class="p-1.5 hover:bg-surface-100 rounded-lg transition-colors">
@@ -256,6 +271,19 @@
 					</div>
 				</div>
 			</Card>
+			<!-- Submit -->
+			<Card>
+				<Button type="submit" variant="primary" size="lg" class="w-full" disabled={submitting}>
+					{#if submitting}
+						<Loader2 class="w-4 h-4 animate-spin" />
+						Creating...
+					{:else}
+						<Send class="w-4 h-4" />
+						Send Invoice
+					{/if}
+				</Button>
+			</Card>
 		</div>
 	</div>
 </div>
+</form>

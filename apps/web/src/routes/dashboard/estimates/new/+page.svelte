@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import TopBar from '$lib/components/layout/TopBar.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -15,8 +16,11 @@
 		Save,
 		Eye,
 		Copy,
-		DollarSign
+		DollarSign,
+		Loader2
 	} from 'lucide-svelte';
+
+	let { form: formResult } = $props();
 
 	interface LineItem {
 		id: string;
@@ -108,8 +112,16 @@
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n);
 	}
 
-	let saving = $state(false);
-	let sending = $state(false);
+	let submitting = $state(false);
+
+	let serializedLineItems = $derived(JSON.stringify(lineItems.map(item => ({
+		description: item.description,
+		category: item.category,
+		quantity: item.quantity,
+		unit: item.unit,
+		unit_price: item.unitPrice,
+		taxable: item.taxable
+	}))));
 </script>
 
 <svelte:head>
@@ -118,24 +130,30 @@
 
 <TopBar>
 	{#snippet actions()}
-		<div class="flex items-center gap-2">
-			<Button variant="ghost" size="md">
-				<Eye class="w-4 h-4" />
-				Preview
-			</Button>
-			<Button variant="outline" size="md" loading={saving}>
-				<Save class="w-4 h-4" />
-				Save Draft
-			</Button>
-			<Button variant="primary" size="md" loading={sending}>
-				<Send class="w-4 h-4" />
-				Send to Customer
-			</Button>
-		</div>
+		<Button variant="outline" size="sm" href="/dashboard/estimates">
+			<ArrowLeft class="w-4 h-4" />
+			Cancel
+		</Button>
 	{/snippet}
 </TopBar>
 
+<form method="POST" action="?/create" use:enhance={() => {
+	submitting = true;
+	return async ({ update }) => {
+		submitting = false;
+		await update();
+	};
+}}>
+	<input type="hidden" name="customer_id" value={customerId} />
+	<input type="hidden" name="title" value={title} />
+	<input type="hidden" name="line_items" value={serializedLineItems} />
+
 <div class="p-6 space-y-6">
+	{#if formResult?.error}
+		<div class="bg-danger-50 border border-danger-200 text-danger-700 px-4 py-3 rounded-xl text-sm">
+			{formResult.error}
+		</div>
+	{/if}
 	<!-- Back + Title -->
 	<div class="flex items-center gap-4">
 		<a href="/dashboard/estimates" class="p-1.5 hover:bg-surface-100 rounded-lg transition-colors">
@@ -352,16 +370,18 @@
 
 				<!-- Actions -->
 				<div class="mt-6 space-y-2">
-					<Button variant="primary" size="lg" class="w-full" loading={sending}>
-						<Send class="w-4 h-4" />
-						Send to Customer
-					</Button>
-					<Button variant="outline" size="md" class="w-full" loading={saving}>
-						<Save class="w-4 h-4" />
-						Save as Draft
+					<Button type="submit" variant="primary" size="lg" class="w-full" disabled={submitting}>
+						{#if submitting}
+							<Loader2 class="w-4 h-4 animate-spin" />
+							Creating...
+						{:else}
+							<Send class="w-4 h-4" />
+							Send to Customer
+						{/if}
 					</Button>
 				</div>
 			</Card>
 		</div>
 	</div>
 </div>
+</form>

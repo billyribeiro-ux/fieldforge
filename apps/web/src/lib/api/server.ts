@@ -1,4 +1,6 @@
-const API_BASE = process.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+import { env } from '$env/dynamic/public';
+
+const API_BASE = env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
 
 interface ServerFetchOptions {
 	token?: string;

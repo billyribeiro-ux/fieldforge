@@ -1,5 +1,5 @@
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import { serverPost } from '$lib/api/server';
 
 export const load: ServerLoad = async () => {
@@ -54,7 +54,7 @@ export const actions: Actions = {
 
 			redirect(303, `/dashboard/customers/${(data as { id: string }).id}`);
 		} catch (e) {
-			if (e instanceof Response || (e && typeof e === 'object' && 'status' in e)) throw e;
+			if (isRedirect(e)) throw e;
 			return fail(500, { error: e instanceof Error ? e.message : 'Failed to create customer' });
 		}
 	}
