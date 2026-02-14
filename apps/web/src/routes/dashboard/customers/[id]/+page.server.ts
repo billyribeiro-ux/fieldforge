@@ -1,5 +1,5 @@
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, isHttpError } from '@sveltejs/kit';
 import { serverFetch, serverPatch, serverPost } from '$lib/api/server';
 
 export const load: ServerLoad = async ({ locals, params }) => {
@@ -25,7 +25,7 @@ export const load: ServerLoad = async ({ locals, params }) => {
 			notes: notesRes.status === 'fulfilled' ? notesRes.value.data : []
 		};
 	} catch (e) {
-		if (e && typeof e === 'object' && 'status' in e) throw e;
+		if (isHttpError(e)) throw e;
 		return {
 			customer: null,
 			properties: [],

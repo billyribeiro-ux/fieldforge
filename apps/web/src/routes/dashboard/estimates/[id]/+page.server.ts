@@ -1,5 +1,5 @@
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, isHttpError } from '@sveltejs/kit';
 import { serverFetch, serverPost } from '$lib/api/server';
 
 export const load: ServerLoad = async ({ locals, params }) => {
@@ -15,7 +15,7 @@ export const load: ServerLoad = async ({ locals, params }) => {
 
 		return { estimate: data };
 	} catch (e) {
-		if (e && typeof e === 'object' && 'status' in e) throw e;
+		if (isHttpError(e)) throw e;
 		return {
 			estimate: null,
 			error: e instanceof Error ? e.message : 'Failed to load estimate'
