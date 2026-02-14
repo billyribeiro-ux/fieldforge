@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::db::repository;
 use crate::errors::ApiResult;
+use crate::middleware::auth::AuthUser;
 use crate::models::common::PaginationParams;
 use crate::models::customer::{CreateCustomerRequest, UpdateCustomerRequest};
 use crate::AppState;
@@ -24,11 +26,10 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn create_customer(
     State(state): State<Arc<AppState>>,
-    // Extension(auth): Extension<AuthUser>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateCustomerRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    // TODO: get team_id from auth user
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     let customer = repository::create_customer(&state.db, team_id, &req).await?;
 
     Ok(Json(json!({
@@ -40,10 +41,11 @@ async fn create_customer(
 
 async fn list_customers(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(pagination): Query<PaginationParams>,
     Query(params): Query<std::collections::HashMap<String, String>>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     let search = params.get("search").map(|s| s.as_str());
     let cursor = pagination.cursor.as_ref().and_then(|c| c.parse::<Uuid>().ok());
 
@@ -62,9 +64,10 @@ async fn list_customers(
 
 async fn get_customer(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     let customer = repository::get_customer(&state.db, team_id, id).await?;
 
     Ok(Json(json!({
@@ -76,10 +79,11 @@ async fn get_customer(
 
 async fn update_customer(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdateCustomerRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     let customer = repository::update_customer(&state.db, team_id, id, &req).await?;
 
     Ok(Json(json!({
@@ -91,9 +95,10 @@ async fn update_customer(
 
 async fn delete_customer(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     repository::delete_customer(&state.db, team_id, id).await?;
 
     Ok(Json(json!({

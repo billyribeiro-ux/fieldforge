@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::license::{
     CreateInsurancePolicyRequest, CreateLicenseRequest, InsurancePolicy, License,
 };
@@ -28,8 +30,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_licenses(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let licenses = sqlx::query_as::<_, License>(
         "SELECT * FROM licenses WHERE team_id = $1 ORDER BY expiry_date ASC",
@@ -43,9 +46,10 @@ async fn list_licenses(
 
 async fn create_license(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateLicenseRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let license = sqlx::query_as::<_, License>(
         r#"INSERT INTO licenses (team_id, user_id, license_type, license_number, issuing_state, issuing_authority, issued_date, expiry_date)
@@ -68,9 +72,10 @@ async fn create_license(
 
 async fn get_license(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let license = sqlx::query_as::<_, License>(
         "SELECT * FROM licenses WHERE id = $1 AND team_id = $2",
@@ -86,9 +91,10 @@ async fn get_license(
 
 async fn delete_license(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM licenses WHERE id = $1 AND team_id = $2")
         .bind(id)
@@ -101,8 +107,9 @@ async fn delete_license(
 
 async fn list_policies(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let policies = sqlx::query_as::<_, InsurancePolicy>(
         "SELECT * FROM insurance_policies WHERE team_id = $1 ORDER BY expiry_date ASC",
@@ -116,9 +123,10 @@ async fn list_policies(
 
 async fn create_policy(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateInsurancePolicyRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let policy = sqlx::query_as::<_, InsurancePolicy>(
         r#"INSERT INTO insurance_policies (team_id, policy_type, provider, policy_number, coverage_amount, premium_amount, effective_date, expiry_date, auto_renew, notes)
@@ -143,9 +151,10 @@ async fn create_policy(
 
 async fn get_policy(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let policy = sqlx::query_as::<_, InsurancePolicy>(
         "SELECT * FROM insurance_policies WHERE id = $1 AND team_id = $2",
@@ -161,9 +170,10 @@ async fn get_policy(
 
 async fn delete_policy(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM insurance_policies WHERE id = $1 AND team_id = $2")
         .bind(id)

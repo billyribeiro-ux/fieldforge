@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::vehicle::{CreateVehicleRequest, Vehicle, VehicleMaintenance};
 use crate::AppState;
 
@@ -20,8 +22,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_vehicles(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let vehicles = sqlx::query_as::<_, Vehicle>(
         "SELECT * FROM vehicles WHERE team_id = $1 ORDER BY make, model",
@@ -39,9 +42,10 @@ async fn list_vehicles(
 
 async fn create_vehicle(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateVehicleRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let vehicle = sqlx::query_as::<_, Vehicle>(
         r#"
@@ -78,9 +82,10 @@ async fn create_vehicle(
 
 async fn get_vehicle(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let vehicle = sqlx::query_as::<_, Vehicle>(
         "SELECT * FROM vehicles WHERE id = $1 AND team_id = $2",
@@ -127,10 +132,11 @@ struct UpdateVehicleRequest {
 
 async fn update_vehicle(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdateVehicleRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let vehicle = sqlx::query_as::<_, Vehicle>(
         r#"
@@ -181,9 +187,10 @@ async fn update_vehicle(
 
 async fn delete_vehicle(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM vehicles WHERE id = $1 AND team_id = $2")
         .bind(id)

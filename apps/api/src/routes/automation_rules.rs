@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::automation_rule::{AutomationRule, CreateAutomationRuleRequest};
 use crate::AppState;
 
@@ -22,8 +24,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_rules(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rules = sqlx::query_as::<_, AutomationRule>(
         "SELECT * FROM automation_rules WHERE team_id = $1 ORDER BY created_at DESC",
@@ -37,9 +40,10 @@ async fn list_rules(
 
 async fn create_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateAutomationRuleRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, AutomationRule>(
         r#"INSERT INTO automation_rules (team_id, name, trigger_event, conditions, actions, delay_minutes)
@@ -60,9 +64,10 @@ async fn create_rule(
 
 async fn get_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, AutomationRule>(
         "SELECT * FROM automation_rules WHERE id = $1 AND team_id = $2",
@@ -78,10 +83,11 @@ async fn get_rule(
 
 async fn update_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<serde_json::Value>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, AutomationRule>(
         r#"UPDATE automation_rules
@@ -107,9 +113,10 @@ async fn update_rule(
 
 async fn delete_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM automation_rules WHERE id = $1 AND team_id = $2")
         .bind(id)
@@ -122,9 +129,10 @@ async fn delete_rule(
 
 async fn toggle_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, AutomationRule>(
         r#"UPDATE automation_rules

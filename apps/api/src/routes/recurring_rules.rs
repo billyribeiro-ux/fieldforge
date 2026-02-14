@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::recurring_rule::{CreateRecurringRuleRequest, RecurringRule};
 use crate::AppState;
 
@@ -23,8 +25,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_rules(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rules = sqlx::query_as::<_, RecurringRule>(
         "SELECT * FROM recurring_rules WHERE team_id = $1 ORDER BY next_occurrence ASC NULLS LAST",
@@ -38,9 +41,10 @@ async fn list_rules(
 
 async fn create_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateRecurringRuleRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, RecurringRule>(
         r#"INSERT INTO recurring_rules (team_id, customer_id, property_id, title, description, frequency, interval_value, day_of_week, day_of_month, start_date, end_date, estimated_duration_minutes, assigned_to, job_type, priority, auto_schedule, advance_days, next_occurrence)
@@ -72,9 +76,10 @@ async fn create_rule(
 
 async fn get_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, RecurringRule>(
         "SELECT * FROM recurring_rules WHERE id = $1 AND team_id = $2",
@@ -90,9 +95,10 @@ async fn get_rule(
 
 async fn delete_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM recurring_rules WHERE id = $1 AND team_id = $2")
         .bind(id)
@@ -105,9 +111,10 @@ async fn delete_rule(
 
 async fn toggle_rule(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, RecurringRule>(
         r#"UPDATE recurring_rules SET is_active = NOT is_active, updated_at = NOW()
@@ -123,9 +130,10 @@ async fn toggle_rule(
 
 async fn generate_next(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let rule = sqlx::query_as::<_, RecurringRule>(
         "SELECT * FROM recurring_rules WHERE id = $1 AND team_id = $2 AND is_active = true",

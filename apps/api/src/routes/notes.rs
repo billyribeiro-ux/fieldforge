@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::note::CreateNoteRequest;
 use crate::AppState;
 
@@ -19,11 +21,12 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn create_note(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(job_id): Path<Uuid>,
     Json(req): Json<CreateNoteRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
-    let user_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     let note_type = req.note_type.as_deref().unwrap_or("text");
     let is_internal = req.is_internal.unwrap_or(false);

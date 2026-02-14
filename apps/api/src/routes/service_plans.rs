@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::service_plan::{CustomerServicePlan, ServicePlan};
 use crate::AppState;
 
@@ -21,8 +23,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_plans(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let plans = sqlx::query_as::<_, ServicePlan>(
         "SELECT * FROM service_plans WHERE team_id = $1 AND is_active = true ORDER BY name",
@@ -53,9 +56,10 @@ struct CreatePlanRequest {
 
 async fn create_plan(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreatePlanRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let visits = req.visits_per_year.unwrap_or(1);
     let priority = req.priority_scheduling.unwrap_or(true);
 
@@ -91,9 +95,10 @@ async fn create_plan(
 
 async fn get_plan(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let plan = sqlx::query_as::<_, ServicePlan>(
         "SELECT * FROM service_plans WHERE id = $1 AND team_id = $2",
@@ -133,10 +138,11 @@ struct UpdatePlanRequest {
 
 async fn update_plan(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdatePlanRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let plan = sqlx::query_as::<_, ServicePlan>(
         r#"
@@ -173,9 +179,10 @@ async fn update_plan(
 
 async fn delete_plan(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query(
         "UPDATE service_plans SET is_active = false, updated_at = now() WHERE id = $1 AND team_id = $2",
@@ -201,10 +208,11 @@ struct EnrollCustomerRequest {
 
 async fn enroll_customer(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(plan_id): Path<Uuid>,
     Json(req): Json<EnrollCustomerRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let frequency = req.billing_frequency.as_deref().unwrap_or("monthly");
 
     let enrollment = sqlx::query_as::<_, CustomerServicePlan>(

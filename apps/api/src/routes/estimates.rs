@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::common::PaginationParams;
 use crate::models::estimate::CreateEstimateRequest;
 use crate::AppState;
@@ -24,9 +26,10 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn create_estimate(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateEstimateRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder — from auth
+    let team_id = auth.team_id.unwrap_or_default();
 
     let mut tx = state.db.begin().await?;
 
@@ -142,10 +145,11 @@ async fn create_estimate(
 
 async fn list_estimates(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(pagination): Query<PaginationParams>,
     Query(params): Query<std::collections::HashMap<String, String>>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let status = params.get("status").map(|s| s.as_str());
     let cursor = pagination.cursor.as_ref().and_then(|c| c.parse::<Uuid>().ok());
 
@@ -191,9 +195,10 @@ async fn list_estimates(
 
 async fn get_estimate(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let estimate = sqlx::query_as::<_, crate::models::estimate::Estimate>(
         "SELECT * FROM estimates WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL",
@@ -232,9 +237,10 @@ async fn update_estimate(
 
 async fn send_estimate(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let estimate = sqlx::query_as::<_, crate::models::estimate::Estimate>(
         r#"
@@ -266,10 +272,11 @@ struct ApproveRequest {
 
 async fn approve_estimate(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<ApproveRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let estimate = sqlx::query_as::<_, crate::models::estimate::Estimate>(
         r#"
@@ -322,10 +329,11 @@ struct DeclineRequest {
 
 async fn decline_estimate(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<DeclineRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let estimate = sqlx::query_as::<_, crate::models::estimate::Estimate>(
         r#"
@@ -353,9 +361,10 @@ async fn decline_estimate(
 
 async fn convert_to_invoice(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let mut tx = state.db.begin().await?;
 

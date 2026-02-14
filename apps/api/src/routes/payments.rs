@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::ApiResult;
+use crate::middleware::auth::AuthUser;
 use crate::models::common::PaginationParams;
 use crate::AppState;
 
@@ -19,9 +21,10 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_payments(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(pagination): Query<PaginationParams>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let limit = pagination.limit();
 
     let payments = sqlx::query_as::<_, crate::models::payment::Payment>(
@@ -46,9 +49,10 @@ async fn list_payments(
 
 async fn get_payment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let payment = sqlx::query_as::<_, crate::models::payment::Payment>(
         r#"SELECT * FROM payments WHERE id = $1 AND team_id = $2"#,
@@ -68,10 +72,11 @@ async fn get_payment(
 
 async fn refund_payment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<RefundRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let payment = sqlx::query_as::<_, crate::models::payment::Payment>(
         r#"SELECT * FROM payments WHERE id = $1 AND team_id = $2"#,

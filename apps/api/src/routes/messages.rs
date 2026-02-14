@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::message::{Message, SendMessageRequest};
 use crate::AppState;
 
@@ -20,8 +22,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_messages(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let messages = sqlx::query_as::<_, Message>(
         "SELECT * FROM messages WHERE team_id = $1 ORDER BY created_at DESC LIMIT 100",
@@ -39,9 +42,10 @@ async fn list_messages(
 
 async fn send_message(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<SendMessageRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     // Look up customer contact info
     let customer = sqlx::query_as::<_, crate::models::customer::Customer>(

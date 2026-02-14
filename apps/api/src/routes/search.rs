@@ -3,11 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Query, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
-use uuid::Uuid;
 
 use crate::errors::ApiResult;
+use crate::middleware::auth::AuthUser;
 use crate::AppState;
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -25,9 +26,10 @@ struct SearchParams {
 
 async fn global_search(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(params): Query<SearchParams>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let limit = params.limit.unwrap_or(10).min(50);
     let query = format!("%{}%", params.q.to_lowercase());
 

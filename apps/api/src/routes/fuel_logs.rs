@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::document::FuelLog;
 use crate::AppState;
 
@@ -18,9 +20,10 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_fuel_logs(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(vehicle_id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let logs = sqlx::query_as::<_, FuelLog>(
         "SELECT * FROM fuel_logs WHERE vehicle_id = $1 AND team_id = $2 ORDER BY filled_at DESC",
@@ -35,10 +38,11 @@ async fn list_fuel_logs(
 
 async fn create_fuel_log(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(vehicle_id): Path<Uuid>,
     Json(req): Json<CreateFuelLogRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let log = sqlx::query_as::<_, FuelLog>(
         r#"INSERT INTO fuel_logs (vehicle_id, team_id, gallons, cost_per_gallon, total_cost, odometer, fuel_type, station, filled_by, filled_at)
@@ -63,9 +67,10 @@ async fn create_fuel_log(
 
 async fn get_fuel_log(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let log = sqlx::query_as::<_, FuelLog>(
         "SELECT * FROM fuel_logs WHERE id = $1 AND team_id = $2",
@@ -81,9 +86,10 @@ async fn get_fuel_log(
 
 async fn delete_fuel_log(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM fuel_logs WHERE id = $1 AND team_id = $2")
         .bind(id)

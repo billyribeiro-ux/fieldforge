@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::property::CreatePropertyRequest;
 use crate::AppState;
 
@@ -18,10 +20,11 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn create_property(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(customer_id): Path<Uuid>,
     Json(req): Json<CreatePropertyRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let property_type = req.property_type.as_deref().unwrap_or("residential");
 
@@ -56,9 +59,10 @@ async fn create_property(
 
 async fn list_customer_properties(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(customer_id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let properties = sqlx::query_as::<_, crate::models::property::Property>(
         "SELECT * FROM properties WHERE customer_id = $1 AND team_id = $2 ORDER BY is_primary DESC, created_at",
@@ -77,9 +81,10 @@ async fn list_customer_properties(
 
 async fn get_property(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let property = sqlx::query_as::<_, crate::models::property::Property>(
         "SELECT * FROM properties WHERE id = $1 AND team_id = $2",
@@ -115,10 +120,11 @@ struct UpdatePropertyRequest {
 
 async fn update_property(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdatePropertyRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let property = sqlx::query_as::<_, crate::models::property::Property>(
         r#"
@@ -167,9 +173,10 @@ async fn update_property(
 
 async fn delete_property(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM properties WHERE id = $1 AND team_id = $2")
         .bind(id)

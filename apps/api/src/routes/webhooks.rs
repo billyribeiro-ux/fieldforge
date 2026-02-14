@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::AppState;
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -40,8 +42,9 @@ struct CreateWebhookRequest {
 
 async fn list_webhooks(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let webhooks = sqlx::query_as::<_, Webhook>(
         "SELECT * FROM webhooks WHERE team_id = $1 ORDER BY created_at DESC",
@@ -59,9 +62,10 @@ async fn list_webhooks(
 
 async fn create_webhook(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateWebhookRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     // Generate a random secret for HMAC signing
     let secret = format!("whsec_{}", Uuid::new_v4().to_string().replace('-', ""));
@@ -91,9 +95,10 @@ async fn create_webhook(
 
 async fn get_webhook(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let webhook = sqlx::query_as::<_, Webhook>(
         "SELECT * FROM webhooks WHERE id = $1 AND team_id = $2",
@@ -113,9 +118,10 @@ async fn get_webhook(
 
 async fn delete_webhook(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM webhooks WHERE id = $1 AND team_id = $2")
         .bind(id)

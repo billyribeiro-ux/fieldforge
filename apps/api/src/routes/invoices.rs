@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::common::PaginationParams;
 use crate::models::invoice::CreateInvoiceRequest;
 use crate::models::payment::RecordPaymentRequest;
@@ -23,9 +25,10 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn create_invoice(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateInvoiceRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let mut tx = state.db.begin().await?;
 
@@ -134,10 +137,11 @@ async fn create_invoice(
 
 async fn list_invoices(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(pagination): Query<PaginationParams>,
     Query(params): Query<std::collections::HashMap<String, String>>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let status = params.get("status").map(|s| s.as_str());
     let cursor = pagination.cursor.as_ref().and_then(|c| c.parse::<Uuid>().ok());
 
@@ -183,9 +187,10 @@ async fn list_invoices(
 
 async fn get_invoice(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let invoice = sqlx::query_as::<_, crate::models::invoice::Invoice>(
         "SELECT * FROM invoices WHERE id = $1 AND team_id = $2 AND deleted_at IS NULL",
@@ -223,9 +228,10 @@ async fn get_invoice(
 
 async fn send_invoice(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let invoice = sqlx::query_as::<_, crate::models::invoice::Invoice>(
         r#"
@@ -252,9 +258,10 @@ async fn send_invoice(
 
 async fn void_invoice(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let invoice = sqlx::query_as::<_, crate::models::invoice::Invoice>(
         r#"
@@ -278,11 +285,12 @@ async fn void_invoice(
 
 async fn record_payment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(invoice_id): Path<Uuid>,
     Json(req): Json<RecordPaymentRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
-    let user_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     // Validate payment amount
     if req.amount <= rust_decimal::Decimal::ZERO {

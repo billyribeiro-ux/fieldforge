@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::{get, patch};
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::db::repository;
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::common::PaginationParams;
 use crate::models::job::{CreateJobRequest, JobFilters, JobStatusTransition, UpdateJobRequest};
 use crate::services::job_service;
@@ -22,9 +24,10 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn create_job(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateJobRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder — from auth
+    let team_id = auth.team_id.unwrap_or_default();
     let job = repository::create_job(&state.db, team_id, &req).await?;
 
     tracing::info!(job_id = %job.id, "Job created: {}", job.title);
@@ -38,10 +41,11 @@ async fn create_job(
 
 async fn list_jobs(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(pagination): Query<PaginationParams>,
     Query(filters): Query<JobFilters>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     let cursor = pagination.cursor.as_ref().and_then(|c| c.parse::<Uuid>().ok());
 
     let jobs = repository::list_jobs(&state.db, team_id, &filters, pagination.limit(), cursor).await?;
@@ -59,9 +63,10 @@ async fn list_jobs(
 
 async fn get_job(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     let job = repository::get_job(&state.db, team_id, id).await?;
 
     Ok(Json(json!({
@@ -73,10 +78,11 @@ async fn get_job(
 
 async fn update_job(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(_req): Json<UpdateJobRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
+    let team_id = auth.team_id.unwrap_or_default();
     let job = repository::get_job(&state.db, team_id, id).await?;
 
     // TODO: apply partial update fields
@@ -89,11 +95,12 @@ async fn update_job(
 
 async fn transition_status(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<JobStatusTransition>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil(); // placeholder
-    let user_id = Uuid::nil(); // placeholder — from auth
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     let job = repository::get_job(&state.db, team_id, id).await?;
 

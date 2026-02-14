@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::review::{CreateReviewRequest, Review};
 use crate::AppState;
 
@@ -20,8 +22,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_reviews(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let reviews = sqlx::query_as::<_, Review>(
         "SELECT * FROM reviews WHERE team_id = $1 ORDER BY created_at DESC",
@@ -48,9 +51,10 @@ async fn list_reviews(
 
 async fn create_review(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateReviewRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let review = sqlx::query_as::<_, Review>(
         r#"

@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Query, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::ApiResult;
+use crate::middleware::auth::AuthUser;
 use crate::models::common::PaginationParams;
 use crate::AppState;
 
@@ -41,10 +43,11 @@ struct AuditLogFilters {
 
 async fn list_audit_log(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(pagination): Query<PaginationParams>,
     Query(filters): Query<AuditLogFilters>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let cursor = pagination.cursor.as_ref().and_then(|c| c.parse::<Uuid>().ok());
 
     let entries = sqlx::query_as::<_, AuditLogEntry>(

@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::equipment::{CreateEquipmentRequest, Equipment};
 use crate::AppState;
 
@@ -19,8 +21,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_equipment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let items = sqlx::query_as::<_, Equipment>(
         "SELECT * FROM equipment WHERE team_id = $1 AND is_active = true ORDER BY name",
@@ -38,9 +41,10 @@ async fn list_equipment(
 
 async fn create_equipment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateEquipmentRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let condition = req.condition.as_deref().unwrap_or("good");
 
     let item = sqlx::query_as::<_, Equipment>(
@@ -78,9 +82,10 @@ async fn create_equipment(
 
 async fn get_equipment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let item = sqlx::query_as::<_, Equipment>(
         "SELECT * FROM equipment WHERE id = $1 AND team_id = $2",
@@ -112,10 +117,11 @@ struct UpdateEquipmentRequest {
 
 async fn update_equipment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdateEquipmentRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let item = sqlx::query_as::<_, Equipment>(
         r#"
@@ -156,9 +162,10 @@ async fn update_equipment(
 
 async fn delete_equipment(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query(
         "UPDATE equipment SET is_active = false, updated_at = now() WHERE id = $1 AND team_id = $2",

@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::checklist::{Checklist, ChecklistItem};
 use crate::AppState;
 
@@ -35,10 +37,11 @@ struct CreateChecklistItemInput {
 
 async fn create_checklist(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(job_id): Path<Uuid>,
     Json(req): Json<CreateChecklistRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let checklist_type = req.checklist_type.as_deref().unwrap_or("custom");
     let is_required = req.is_required.unwrap_or(false);
 
@@ -218,9 +221,10 @@ async fn add_item(
 
 async fn toggle_item(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path((checklist_id, item_id)): Path<(Uuid, Uuid)>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let user_id = Uuid::nil();
+    let user_id = auth.id;
 
     let item = sqlx::query_as::<_, ChecklistItem>(
         r#"

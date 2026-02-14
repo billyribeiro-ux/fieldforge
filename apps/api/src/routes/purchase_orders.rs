@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::document::PurchaseOrder;
 use crate::AppState;
 
@@ -22,8 +24,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_orders(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let orders = sqlx::query_as::<_, PurchaseOrder>(
         "SELECT * FROM purchase_orders WHERE team_id = $1 ORDER BY created_at DESC",
@@ -37,9 +40,10 @@ async fn list_orders(
 
 async fn create_order(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreatePurchaseOrderRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let order = sqlx::query_as::<_, PurchaseOrder>(
         r#"INSERT INTO purchase_orders (team_id, job_id, vendor, po_number, status, subtotal, tax, total, notes, expected_date, created_by)
@@ -64,9 +68,10 @@ async fn create_order(
 
 async fn get_order(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let order = sqlx::query_as::<_, PurchaseOrder>(
         "SELECT * FROM purchase_orders WHERE id = $1 AND team_id = $2",
@@ -82,10 +87,11 @@ async fn get_order(
 
 async fn update_order(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<serde_json::Value>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let order = sqlx::query_as::<_, PurchaseOrder>(
         r#"UPDATE purchase_orders
@@ -109,9 +115,10 @@ async fn update_order(
 
 async fn delete_order(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM purchase_orders WHERE id = $1 AND team_id = $2")
         .bind(id)
@@ -124,9 +131,10 @@ async fn delete_order(
 
 async fn receive_order(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let order = sqlx::query_as::<_, PurchaseOrder>(
         r#"UPDATE purchase_orders

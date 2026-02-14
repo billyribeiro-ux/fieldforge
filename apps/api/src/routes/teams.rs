@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::{get, patch, post};
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::AppState;
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -20,8 +22,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn get_team(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let team = sqlx::query_as::<_, crate::models::team::Team>(
         "SELECT * FROM teams WHERE id = $1",
@@ -54,9 +57,10 @@ struct UpdateTeamRequest {
 
 async fn update_team(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<UpdateTeamRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let team = sqlx::query_as::<_, crate::models::team::Team>(
         r#"
@@ -99,8 +103,9 @@ async fn update_team(
 
 async fn list_members(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let members = sqlx::query_as::<_, crate::models::user::User>(
         "SELECT * FROM users WHERE team_id = $1 AND deleted_at IS NULL ORDER BY first_name",
@@ -127,9 +132,10 @@ struct InviteMemberRequest {
 
 async fn invite_member(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<InviteMemberRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     // Check if email already exists
     let exists = sqlx::query_scalar::<_, i64>(
@@ -181,10 +187,11 @@ struct UpdateMemberRequest {
 
 async fn update_member(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdateMemberRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let user = sqlx::query_as::<_, crate::models::user::User>(
         r#"
@@ -213,9 +220,10 @@ async fn update_member(
 
 async fn deactivate_member(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query(
         "UPDATE users SET is_active = false, updated_at = now() WHERE id = $1 AND team_id = $2",

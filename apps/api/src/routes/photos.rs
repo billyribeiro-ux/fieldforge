@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use axum::Extension;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::AppState;
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -34,9 +36,10 @@ struct PresignedUrlResponse {
 
 async fn get_presigned_upload_url(
     State(_state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<PresignedUrlRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let file_id = Uuid::new_v4();
 
     // Generate S3 key: team_id/photos/year/month/file_id.ext
@@ -95,11 +98,12 @@ struct CreatePhotoRequest {
 
 async fn create_photo(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(job_id): Path<Uuid>,
     Json(req): Json<CreatePhotoRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
-    let user_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     let category = req.category.as_deref().unwrap_or("general");
 

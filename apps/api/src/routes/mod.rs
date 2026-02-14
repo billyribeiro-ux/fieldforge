@@ -37,11 +37,19 @@ pub mod stripe;
 use std::sync::Arc;
 use axum::Router;
 use crate::AppState;
+use crate::middleware::auth::require_auth;
 
-pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
-    Router::new()
+pub fn api_router(state: Arc<AppState>) -> Router<Arc<AppState>> {
+    // Public routes — no auth required
+    let public_routes = Router::new()
         .merge(health::router())
         .merge(auth::router())
+        .merge(portal::router())
+        .merge(stripe::router())
+        .merge(webhooks::router());
+
+    // Protected routes — require valid JWT
+    let protected_routes = Router::new()
         .merge(customers::router())
         .merge(jobs::router())
         .merge(estimates::router())
@@ -61,7 +69,6 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(teams::router())
         .merge(search::router())
         .merge(audit::router())
-        .merge(webhooks::router())
         .merge(notifications::router())
         .merge(payments::router())
         .merge(ws::router())
@@ -73,6 +80,9 @@ pub fn api_router(_state: Arc<AppState>) -> Router<Arc<AppState>> {
         .merge(fuel_logs::router())
         .merge(purchase_orders::router())
         .merge(gps::router())
-        .merge(portal::router())
-        .merge(stripe::router())
+        .layer(axum::middleware::from_fn_with_state(state.clone(), require_auth));
+
+    Router::new()
+        .merge(public_routes)
+        .merge(protected_routes)
 }

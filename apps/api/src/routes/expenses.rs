@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::expense::{CreateExpenseRequest, Expense};
 use crate::AppState;
 
@@ -28,9 +30,10 @@ struct ExpenseFilters {
 
 async fn list_expenses(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(_filters): Query<ExpenseFilters>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let expenses = sqlx::query_as::<_, Expense>(
         "SELECT * FROM expenses WHERE team_id = $1 ORDER BY expense_date DESC",
@@ -50,10 +53,11 @@ async fn list_expenses(
 
 async fn create_expense(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateExpenseRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
-    let user_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     let is_billable = req.is_billable.unwrap_or(false);
     let is_reimbursable = req.is_reimbursable.unwrap_or(false);
@@ -96,9 +100,10 @@ async fn create_expense(
 
 async fn get_expense(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let expense = sqlx::query_as::<_, Expense>(
         "SELECT * FROM expenses WHERE id = $1 AND team_id = $2",
@@ -129,10 +134,11 @@ struct UpdateExpenseRequest {
 
 async fn update_expense(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdateExpenseRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let expense = sqlx::query_as::<_, Expense>(
         r#"
@@ -171,9 +177,10 @@ async fn update_expense(
 
 async fn delete_expense(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM expenses WHERE id = $1 AND team_id = $2")
         .bind(id)

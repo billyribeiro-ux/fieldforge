@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::document::{Document, Signature};
 use crate::AppState;
 
@@ -25,9 +27,10 @@ struct DocumentFilter {
 
 async fn list_documents(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(filter): Query<DocumentFilter>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let docs = if let (Some(entity_type), Some(entity_id)) = (&filter.entity_type, filter.entity_id) {
         sqlx::query_as::<_, Document>(
@@ -52,9 +55,10 @@ async fn list_documents(
 
 async fn create_document(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateDocumentRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let doc = sqlx::query_as::<_, Document>(
         r#"INSERT INTO documents (team_id, entity_type, entity_id, file_name, file_url, file_size, mime_type, uploaded_by, description)
@@ -78,9 +82,10 @@ async fn create_document(
 
 async fn get_document(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let doc = sqlx::query_as::<_, Document>(
         "SELECT * FROM documents WHERE id = $1 AND team_id = $2",
@@ -96,9 +101,10 @@ async fn get_document(
 
 async fn delete_document(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query("DELETE FROM documents WHERE id = $1 AND team_id = $2")
         .bind(id)
@@ -111,9 +117,10 @@ async fn delete_document(
 
 async fn list_signatures(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(filter): Query<DocumentFilter>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let sigs = if let (Some(entity_type), Some(entity_id)) = (&filter.entity_type, filter.entity_id) {
         sqlx::query_as::<_, Signature>(
@@ -138,9 +145,10 @@ async fn list_signatures(
 
 async fn create_signature(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateSignatureRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let sig = sqlx::query_as::<_, Signature>(
         r#"INSERT INTO signatures (team_id, entity_type, entity_id, signer_name, signer_email, signature_url, ip_address, signed_at)

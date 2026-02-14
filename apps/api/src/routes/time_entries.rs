@@ -3,10 +3,12 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use axum::Extension;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::time_entry::{StartTimerRequest, StopTimerRequest};
 use crate::AppState;
 
@@ -20,10 +22,11 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn start_timer(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<StartTimerRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
-    let user_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     // Check for existing active timer
     let active = sqlx::query_scalar::<_, i64>(
@@ -73,10 +76,11 @@ async fn start_timer(
 
 async fn stop_timer(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<StopTimerRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let user_id = Uuid::nil();
+    let user_id = auth.id;
 
     let entry = sqlx::query_as::<_, crate::models::time_entry::TimeEntry>(
         r#"
@@ -129,8 +133,9 @@ async fn stop_timer(
 
 async fn get_active_timer(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let user_id = Uuid::nil();
+    let user_id = auth.id;
 
     let entry = sqlx::query_as::<_, crate::models::time_entry::TimeEntry>(
         "SELECT * FROM time_entries WHERE user_id = $1 AND ended_at IS NULL ORDER BY started_at DESC LIMIT 1",

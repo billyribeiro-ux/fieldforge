@@ -3,12 +3,14 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use axum::Extension;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::ApiResult;
+use crate::middleware::auth::AuthUser;
 use crate::AppState;
 
 pub fn router() -> Router<Arc<AppState>> {
@@ -34,10 +36,11 @@ struct GpsLocation {
 
 async fn update_location(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<UpdateLocationRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
-    let user_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     // Upsert into a GPS tracking table (or use Redis for real-time)
     let loc = sqlx::query_as::<_, GpsLocation>(
@@ -61,8 +64,9 @@ async fn update_location(
 
 async fn list_technician_locations(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     // Get the latest location for each technician
     let locations = sqlx::query_as::<_, GpsLocation>(
@@ -80,9 +84,10 @@ async fn list_technician_locations(
 
 async fn location_history(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(user_id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let history = sqlx::query_as::<_, GpsLocation>(
         r#"SELECT * FROM gps_locations

@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, Query, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::ApiResult;
+use crate::middleware::auth::AuthUser;
 use crate::models::common::PaginationParams;
 use crate::AppState;
 
@@ -39,10 +41,11 @@ struct NotificationFilters {
 
 async fn list_notifications(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Query(pagination): Query<PaginationParams>,
     Query(filters): Query<NotificationFilters>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let user_id = Uuid::nil();
+    let user_id = auth.id;
     let cursor = pagination.cursor.as_ref().and_then(|c| c.parse::<Uuid>().ok());
     let unread_only = filters.unread_only.unwrap_or(false);
 
@@ -73,9 +76,10 @@ async fn list_notifications(
 
 async fn mark_read(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let user_id = Uuid::nil();
+    let user_id = auth.id;
 
     sqlx::query(
         "UPDATE notifications SET read_at = now() WHERE id = $1 AND user_id = $2 AND read_at IS NULL",
@@ -94,8 +98,9 @@ async fn mark_read(
 
 async fn mark_all_read(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let user_id = Uuid::nil();
+    let user_id = auth.id;
 
     let result = sqlx::query(
         "UPDATE notifications SET read_at = now() WHERE user_id = $1 AND read_at IS NULL",
@@ -113,8 +118,9 @@ async fn mark_all_read(
 
 async fn unread_count(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let user_id = Uuid::nil();
+    let user_id = auth.id;
 
     let count = sqlx::query_scalar::<_, i64>(
         "SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND read_at IS NULL",

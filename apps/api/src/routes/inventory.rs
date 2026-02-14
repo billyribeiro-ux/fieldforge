@@ -3,11 +3,13 @@ use std::sync::Arc;
 use axum::extract::{Path, State};
 use axum::routing::get;
 use axum::{Json, Router};
+use axum::Extension;
 use serde::Deserialize;
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::errors::{ApiError, ApiResult};
+use crate::middleware::auth::AuthUser;
 use crate::models::inventory::{CreateInventoryItemRequest, InventoryItem, InventoryLocation, InventoryStock};
 use crate::AppState;
 
@@ -22,8 +24,9 @@ pub fn router() -> Router<Arc<AppState>> {
 
 async fn list_items(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let items = sqlx::query_as::<_, InventoryItem>(
         "SELECT * FROM inventory_items WHERE team_id = $1 AND is_active = true ORDER BY name",
@@ -41,9 +44,10 @@ async fn list_items(
 
 async fn create_item(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateInventoryItemRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let unit = req.unit_of_measure.as_deref().unwrap_or("each");
 
     let item = sqlx::query_as::<_, InventoryItem>(
@@ -78,9 +82,10 @@ async fn create_item(
 
 async fn get_item(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let item = sqlx::query_as::<_, InventoryItem>(
         "SELECT * FROM inventory_items WHERE id = $1 AND team_id = $2",
@@ -122,10 +127,11 @@ struct UpdateInventoryItemRequest {
 
 async fn update_item(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<UpdateInventoryItemRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let item = sqlx::query_as::<_, InventoryItem>(
         r#"
@@ -166,9 +172,10 @@ async fn update_item(
 
 async fn delete_item(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     sqlx::query(
         "UPDATE inventory_items SET is_active = false, updated_at = now() WHERE id = $1 AND team_id = $2",
@@ -187,8 +194,9 @@ async fn delete_item(
 
 async fn list_locations(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
 
     let locations = sqlx::query_as::<_, InventoryLocation>(
         "SELECT * FROM inventory_locations WHERE team_id = $1 AND is_active = true ORDER BY name",
@@ -214,9 +222,10 @@ struct CreateLocationRequest {
 
 async fn create_location(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Json(req): Json<CreateLocationRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
     let loc_type = req.location_type.as_deref().unwrap_or("warehouse");
 
     let location = sqlx::query_as::<_, InventoryLocation>(
@@ -272,11 +281,12 @@ struct AdjustStockRequest {
 
 async fn adjust_stock(
     State(state): State<Arc<AppState>>,
+    Extension(auth): Extension<AuthUser>,
     Path(id): Path<Uuid>,
     Json(req): Json<AdjustStockRequest>,
 ) -> ApiResult<Json<serde_json::Value>> {
-    let team_id = Uuid::nil();
-    let user_id = Uuid::nil();
+    let team_id = auth.team_id.unwrap_or_default();
+    let user_id = auth.id;
 
     let mut tx = state.db.begin().await?;
 
