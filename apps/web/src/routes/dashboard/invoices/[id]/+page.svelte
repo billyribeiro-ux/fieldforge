@@ -23,7 +23,9 @@
 
 
 	let { data } = $props();
-	const invoice = {
+
+	// Demo fallback data
+	const demoInvoice = {
 		id: page.params.id,
 		number: 'FF-001',
 		status: 'sent',
@@ -52,6 +54,26 @@
 		],
 		payments: []
 	};
+
+	// Use server data when available, fallback to demo
+	const serverInvoice = data?.invoice as any;
+	const serverPayments = (data?.payments ?? []) as any[];
+	const invoice = serverInvoice ? {
+		...demoInvoice,
+		id: serverInvoice.id ?? demoInvoice.id,
+		number: serverInvoice.invoice_number ?? demoInvoice.number,
+		status: serverInvoice.status ?? demoInvoice.status,
+		subtotal: Number(serverInvoice.subtotal ?? demoInvoice.subtotal),
+		discount_amount: Number(serverInvoice.discount_amount ?? demoInvoice.discount_amount),
+		tax_amount: Number(serverInvoice.tax_amount ?? demoInvoice.tax_amount),
+		total: Number(serverInvoice.total ?? demoInvoice.total),
+		amount_paid: Number(serverInvoice.amount_paid ?? demoInvoice.amount_paid),
+		amount_due: Number(serverInvoice.total ?? demoInvoice.total) - Number(serverInvoice.amount_paid ?? 0),
+		due_date: serverInvoice.due_date ?? demoInvoice.due_date,
+		sent_at: serverInvoice.sent_at?.split('T')[0] ?? demoInvoice.sent_at,
+		payment_terms: serverInvoice.payment_terms ?? demoInvoice.payment_terms,
+		payments: serverPayments.length > 0 ? serverPayments : demoInvoice.payments,
+	} : demoInvoice;
 
 	let showPaymentModal = $state(false);
 	let paymentAmount = $state(invoice.amount_due.toString());

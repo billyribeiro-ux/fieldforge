@@ -23,7 +23,9 @@
 
 
 	let { data } = $props();
-	const customer = {
+
+	// Demo fallback data
+	const demoCustomer = {
 		id: page.params.id,
 		first_name: 'Sarah',
 		last_name: 'Johnson',
@@ -62,6 +64,24 @@
 			{ type: 'email', direction: 'outbound', content: 'Estimate #EST-001 sent for AC Unit Replacement', time: 'Dec 10, 2024' }
 		]
 	};
+
+	// Use server data when available, fallback to demo
+	const serverCustomer = data?.customer as any;
+	const customer = serverCustomer ? {
+		...demoCustomer,
+		id: serverCustomer.id ?? demoCustomer.id,
+		first_name: serverCustomer.first_name ?? demoCustomer.first_name,
+		last_name: serverCustomer.last_name ?? demoCustomer.last_name,
+		email: serverCustomer.email ?? demoCustomer.email,
+		phone: serverCustomer.phone ?? demoCustomer.phone,
+		company: serverCustomer.company_name ?? demoCustomer.company,
+		tags: serverCustomer.tags ?? demoCustomer.tags,
+		lifetime_value: Number(serverCustomer.lifetime_value ?? demoCustomer.lifetime_value),
+		outstanding_balance: Number(serverCustomer.outstanding_balance ?? demoCustomer.outstanding_balance),
+		notes_pinned: serverCustomer.notes_pinned ?? demoCustomer.notes_pinned,
+		created_at: serverCustomer.created_at?.split('T')[0] ?? demoCustomer.created_at,
+		properties: (data?.properties as any[])?.length ? data.properties : demoCustomer.properties,
+	} : demoCustomer;
 
 	function formatCurrency(n: number): string {
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n);

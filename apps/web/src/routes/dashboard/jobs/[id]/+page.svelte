@@ -27,8 +27,9 @@
 
 
 	let { data } = $props();
-	// Demo data — would come from API based on page.params.id
-	const job = {
+
+	// Demo fallback data
+	const demoJob = {
 		id: page.params.id,
 		title: 'AC Unit Replacement',
 		description: 'Replace 3-ton Carrier AC unit. Customer reports intermittent cooling and high energy bills. Unit is 15 years old.',
@@ -85,6 +86,24 @@
 			{ id: '10', text: 'Clean up site', done: false }
 		]
 	};
+
+	// Use server data when available, fallback to demo
+	const serverJob = data?.job as any;
+	const job = serverJob ? {
+		...demoJob,
+		id: serverJob.id ?? demoJob.id,
+		title: serverJob.title ?? demoJob.title,
+		description: serverJob.description ?? demoJob.description,
+		status: serverJob.status ?? demoJob.status,
+		priority: serverJob.priority ?? demoJob.priority,
+		trade: serverJob.trade ?? demoJob.trade,
+		tags: serverJob.tags ?? demoJob.tags,
+		scheduled_date: serverJob.scheduled_date ?? demoJob.scheduled_date,
+		total: serverJob.total_amount ? Number(serverJob.total_amount) : demoJob.total,
+		created_at: serverJob.created_at?.split('T')[0] ?? demoJob.created_at,
+		notes: (data?.notes as any[])?.length ? data.notes : demoJob.notes,
+		time_entries: (data?.timeEntries as any[])?.length ? data.timeEntries : demoJob.time_entries,
+	} : demoJob;
 
 	let timerRunning = $state(true);
 	let timerElapsed = $state('1h 23m');

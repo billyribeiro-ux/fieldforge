@@ -20,7 +20,9 @@
 
 
 	let { data } = $props();
-	const estimate = {
+
+	// Demo fallback data
+	const demoEstimate = {
 		id: page.params.id,
 		number: 'EST-001',
 		title: 'AC Unit Replacement — 3 Ton Carrier',
@@ -54,6 +56,26 @@
 			{ action: 'Customer viewed estimate', user: 'System', time: 'Dec 10, 2024 9:15 AM' }
 		]
 	};
+
+	// Use server data when available, fallback to demo
+	const serverEstimate = data?.estimate as any;
+	const estimate = serverEstimate ? {
+		...demoEstimate,
+		id: serverEstimate.id ?? demoEstimate.id,
+		number: serverEstimate.estimate_number ?? demoEstimate.number,
+		title: serverEstimate.title ?? demoEstimate.title,
+		status: serverEstimate.status ?? demoEstimate.status,
+		scope_of_work: serverEstimate.scope_of_work ?? demoEstimate.scope_of_work,
+		subtotal: Number(serverEstimate.subtotal ?? demoEstimate.subtotal),
+		discount_amount: Number(serverEstimate.discount_amount ?? demoEstimate.discount_amount),
+		tax_amount: Number(serverEstimate.tax_amount ?? demoEstimate.tax_amount),
+		total: Number(serverEstimate.total ?? demoEstimate.total),
+		valid_until: serverEstimate.valid_until ?? demoEstimate.valid_until,
+		sent_at: serverEstimate.sent_at?.split('T')[0] ?? demoEstimate.sent_at,
+		created_at: serverEstimate.created_at?.split('T')[0] ?? demoEstimate.created_at,
+		payment_terms: serverEstimate.payment_terms ?? demoEstimate.payment_terms,
+		warranty_terms: serverEstimate.warranty_terms ?? demoEstimate.warranty_terms,
+	} : demoEstimate;
 
 	function formatCurrency(n: number): string {
 		return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n);
