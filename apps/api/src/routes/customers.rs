@@ -21,7 +21,6 @@ pub fn router() -> Router<Arc<AppState>> {
             "/customers/{id}",
             get(get_customer).patch(update_customer).delete(delete_customer),
         )
-    // TODO: In production, wrap with require_auth middleware layer
 }
 
 async fn create_customer(
